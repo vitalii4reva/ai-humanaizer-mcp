@@ -34,6 +34,7 @@ export class OllamaClient {
           top_p: options?.top_p,
           repeat_penalty: options?.repeat_penalty,
         },
+        format: options?.format,
         // @ts-expect-error - AbortSignal is supported but not in types
         signal: controller.signal,
       });

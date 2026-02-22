@@ -15,6 +15,7 @@ export interface OllamaModelConfig {
   top_p: number;
   repeat_penalty: number;
   timeoutMs: number;
+  format?: Record<string, unknown>;
 }
 
 export interface HumanizeRequest {
