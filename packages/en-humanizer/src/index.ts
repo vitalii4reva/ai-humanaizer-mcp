@@ -292,15 +292,26 @@ async function main() {
           const input = HumanizeUntilHumanInputSchema.parse(args);
           const finalStyle = resolveStyle(input.text, input.style);
           const minScore = input.min_score ?? 90;
-          const maxIterations = input.max_iterations ?? 5;
+          const maxIterations = input.max_iterations ?? 3;
 
           let currentText = input.text;
-          const history: { iteration: number; score: number; text: string }[] = [];
+          const history: { iteration: number; score: number }[] = [];
+          let bestText = currentText;
+          let bestScore = 0;
+          let plateauCount = 0;
 
           for (let i = 1; i <= maxIterations; i++) {
-            // Score current text
             const scoreResult = await processor.scoreHumanness(currentText);
-            history.push({ iteration: i, score: scoreResult.score, text: currentText });
+            history.push({ iteration: i, score: scoreResult.score });
+
+            // Track best result
+            if (scoreResult.score > bestScore) {
+              bestScore = scoreResult.score;
+              bestText = currentText;
+              plateauCount = 0;
+            } else {
+              plateauCount++;
+            }
 
             if (scoreResult.score >= minScore) {
               const formatted = [
@@ -321,25 +332,54 @@ async function main() {
                   score: scoreResult.score,
                   iterations: i - 1,
                   targetReached: true,
-                  history: history.map(h => ({ iteration: h.iteration, score: h.score })),
+                  history,
                 },
               };
             }
 
-            // Humanize for next iteration
+            // Plateau detection: stop if no improvement for 2 consecutive iterations
+            if (plateauCount >= 2) {
+              const formatted = [
+                `## Humanization Stopped (plateau)`,
+                `**Target:** ${minScore}% | **Best:** ${bestScore}% | **Iterations:** ${i} (score stopped improving)`,
+                '',
+                '## Final Text',
+                bestText,
+                '',
+                '## Score History',
+                ...history.map(h => `- Iteration ${h.iteration}: ${h.score}%`),
+              ].join('\n');
+
+              return {
+                content: [{ type: 'text', text: formatted }],
+                structuredContent: {
+                  text: bestText,
+                  score: bestScore,
+                  iterations: i,
+                  targetReached: false,
+                  stoppedReason: 'plateau',
+                  history,
+                },
+              };
+            }
+
             currentText = await processor.humanize(currentText, finalStyle);
           }
 
           // Final score after last humanization
           const finalScore = await processor.scoreHumanness(currentText);
-          history.push({ iteration: maxIterations + 1, score: finalScore.score, text: currentText });
+          history.push({ iteration: maxIterations + 1, score: finalScore.score });
+          if (finalScore.score > bestScore) {
+            bestScore = finalScore.score;
+            bestText = currentText;
+          }
 
           const formatted = [
             `## Humanization Incomplete`,
-            `**Target:** ${minScore}% | **Best:** ${finalScore.score}% | **Iterations:** ${maxIterations} (max reached)`,
+            `**Target:** ${minScore}% | **Best:** ${bestScore}% | **Iterations:** ${maxIterations} (max reached)`,
             '',
             '## Final Text',
-            currentText,
+            bestText,
             '',
             '## Score History',
             ...history.map(h => `- Iteration ${h.iteration}: ${h.score}%`),
@@ -348,11 +388,12 @@ async function main() {
           return {
             content: [{ type: 'text', text: formatted }],
             structuredContent: {
-              text: currentText,
-              score: finalScore.score,
+              text: bestText,
+              score: bestScore,
               iterations: maxIterations,
-              targetReached: finalScore.score >= minScore,
-              history: history.map(h => ({ iteration: h.iteration, score: h.score })),
+              targetReached: bestScore >= minScore,
+              stoppedReason: 'max_iterations',
+              history,
             },
           };
         }
