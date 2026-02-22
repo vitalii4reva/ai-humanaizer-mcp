@@ -1,0 +1,18 @@
+{
+  "name": "ai-humanaizer",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "build:shared": "tsc --build packages/shared",
+    "build:en": "tsc --build packages/en-humanizer",
+    "build:uk": "tsc --build packages/uk-humanizer"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
