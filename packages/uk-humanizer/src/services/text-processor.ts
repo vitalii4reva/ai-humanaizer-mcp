@@ -10,7 +10,7 @@ import { jsonrepair } from 'jsonrepair';
 import { DetectionOutputSchema, ScoreOutputSchema } from '../schemas/tool-schemas.js';
 
 export class TextProcessor {
-  private readonly MODEL = 'qwen3:30b';
+  private readonly MODEL = 'gemma3:27b';
 
   constructor(
     private ollama: OllamaClient,
