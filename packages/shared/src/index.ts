@@ -4,3 +4,4 @@
 
 export * from './types.js';
 export { OllamaClient } from './ollama-client.js';
+export { PromptLoader } from './prompt-loader.js';
