@@ -20,6 +20,7 @@ import {
   DetectInputSchema,
   CompareInputSchema,
   ScoreInputSchema,
+  HumanizeUntilHumanInputSchema,
 } from './schemas/tool-schemas.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -107,6 +108,34 @@ const scoreHumannessTool: Tool = {
   },
 };
 
+const humanizeUntilHumanTool: Tool = {
+  name: 'humanize_until_human',
+  description: 'Iteratively rewrite AI Ukrainian text until humanness score reaches target threshold (default 90%). Returns final text, score, and iteration history.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      text: {
+        type: 'string',
+        description: 'The text to humanize',
+      },
+      style: {
+        type: 'string',
+        enum: ['casual', 'professional', 'academic', 'blog', 'journalistic'],
+        description: 'Writing style (optional, will auto-detect if not provided)',
+      },
+      min_score: {
+        type: 'number',
+        description: 'Minimum humanness score to achieve (0-100, default: 90)',
+      },
+      max_iterations: {
+        type: 'number',
+        description: 'Maximum rewrite attempts (1-10, default: 5)',
+      },
+    },
+    required: ['text'],
+  },
+};
+
 // Start the server
 async function main() {
   // Initialize services
@@ -136,6 +165,7 @@ async function main() {
         detectAiPatternsTool,
         compareVersionsTool,
         scoreHumannessTool,
+        humanizeUntilHumanTool,
       ],
     };
   });
@@ -255,6 +285,72 @@ async function main() {
               },
             ],
             structuredContent: result,
+          };
+        }
+
+        case 'humanize_until_human': {
+          const input = HumanizeUntilHumanInputSchema.parse(args);
+          const finalStyle = resolveStyle(input.text, input.style);
+          const minScore = input.min_score ?? 90;
+          const maxIterations = input.max_iterations ?? 5;
+
+          let currentText = input.text;
+          const history: { iteration: number; score: number; text: string }[] = [];
+
+          for (let i = 1; i <= maxIterations; i++) {
+            const scoreResult = await processor.scoreHumanness(currentText);
+            history.push({ iteration: i, score: scoreResult.score, text: currentText });
+
+            if (scoreResult.score >= minScore) {
+              const formatted = [
+                `## Humanization Complete`,
+                `**Target:** ${minScore}% | **Achieved:** ${scoreResult.score}% | **Iterations:** ${i === 1 ? '0 (already human)' : i - 1}`,
+                '',
+                '## Final Text',
+                currentText,
+                '',
+                '## Score History',
+                ...history.map(h => `- Iteration ${h.iteration}: ${h.score}%`),
+              ].join('\n');
+
+              return {
+                content: [{ type: 'text', text: formatted }],
+                structuredContent: {
+                  text: currentText,
+                  score: scoreResult.score,
+                  iterations: i - 1,
+                  targetReached: true,
+                  history: history.map(h => ({ iteration: h.iteration, score: h.score })),
+                },
+              };
+            }
+
+            currentText = await processor.humanize(currentText, finalStyle);
+          }
+
+          const finalScore = await processor.scoreHumanness(currentText);
+          history.push({ iteration: maxIterations + 1, score: finalScore.score, text: currentText });
+
+          const formatted = [
+            `## Humanization Incomplete`,
+            `**Target:** ${minScore}% | **Best:** ${finalScore.score}% | **Iterations:** ${maxIterations} (max reached)`,
+            '',
+            '## Final Text',
+            currentText,
+            '',
+            '## Score History',
+            ...history.map(h => `- Iteration ${h.iteration}: ${h.score}%`),
+          ].join('\n');
+
+          return {
+            content: [{ type: 'text', text: formatted }],
+            structuredContent: {
+              text: currentText,
+              score: finalScore.score,
+              iterations: maxIterations,
+              targetReached: finalScore.score >= minScore,
+              history: history.map(h => ({ iteration: h.iteration, score: h.score })),
+            },
           };
         }
 

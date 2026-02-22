@@ -23,6 +23,13 @@ export const ScoreInputSchema = z.object({
   text: z.string().min(1),
 });
 
+export const HumanizeUntilHumanInputSchema = z.object({
+  text: z.string().min(1),
+  style: z.enum(['casual', 'professional', 'academic', 'blog', 'journalistic']).optional(),
+  min_score: z.number().min(0).max(100).optional(),
+  max_iterations: z.number().min(1).max(10).optional(),
+});
+
 // Output schemas for structured LLM responses
 export const DetectionOutputSchema = z.object({
   patterns: z.array(
