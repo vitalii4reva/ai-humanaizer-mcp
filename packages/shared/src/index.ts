@@ -3,3 +3,4 @@
  */
 
 export * from './types.js';
+export { OllamaClient } from './ollama-client.js';

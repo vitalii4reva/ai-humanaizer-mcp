@@ -4,6 +4,11 @@
 
 export type WritingStyle = 'casual' | 'professional' | 'academic' | 'blog' | 'journalistic';
 
+export interface OllamaChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 export interface OllamaModelConfig {
   model: string;
   temperature: number;
