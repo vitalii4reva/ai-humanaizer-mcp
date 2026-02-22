@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "node",
+      "args": ["packages/en-humanizer/dist/index.js"]
+    },
+    "uk-humanizer": {
+      "command": "node",
+      "args": ["packages/uk-humanizer/dist/index.js"]
+    }
+  }
+}

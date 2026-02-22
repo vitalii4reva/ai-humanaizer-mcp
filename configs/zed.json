@@ -1,0 +1,16 @@
+{
+  "context_servers": {
+    "en-humanizer": {
+      "command": {
+        "path": "node",
+        "args": ["packages/en-humanizer/dist/index.js"]
+      }
+    },
+    "uk-humanizer": {
+      "command": {
+        "path": "node",
+        "args": ["packages/uk-humanizer/dist/index.js"]
+      }
+    }
+  }
+}
