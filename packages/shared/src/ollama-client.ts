@@ -26,23 +26,35 @@ export class OllamaClient {
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await this.ollama.chat({
+      const chatOptions: Record<string, unknown> = {
         model,
         messages,
+        stream: false,
         options: {
           temperature: options?.temperature,
           top_p: options?.top_p,
           repeat_penalty: options?.repeat_penalty,
         },
-        format: options?.format,
-        // @ts-expect-error - AbortSignal is supported but not in types
         signal: controller.signal,
-      });
+      };
+
+      if (options?.format) {
+        chatOptions.format = options.format;
+      }
+      if (options?.think !== undefined) {
+        chatOptions.think = options.think;
+      }
+
+      const response = await (this.ollama as any).chat(chatOptions);
 
       return response.message.content;
     } catch (error: any) {
-      // AbortError from timeout
-      if (error.name === 'AbortError') {
+      // AbortError from timeout — check BEFORE connection errors
+      // because abort can produce "fetch failed" message too
+      if (
+        error.name === 'AbortError' ||
+        (controller.signal.aborted && error.message?.includes('fetch failed'))
+      ) {
         throw new Error(
           `Model loading timeout (${timeoutMs}ms). The model may still be loading. Try again in 30 seconds.`
         );

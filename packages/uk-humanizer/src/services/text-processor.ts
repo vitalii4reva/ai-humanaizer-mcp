@@ -63,6 +63,7 @@ export class TextProcessor {
           top_p: 0.5,
           repeat_penalty: 1.1,
           format: jsonSchema,
+          think: false,
         }
       );
     });
@@ -106,6 +107,7 @@ export class TextProcessor {
           top_p: 0.5,
           repeat_penalty: 1.1,
           format: jsonSchema,
+          think: false,
         }
       );
     });
