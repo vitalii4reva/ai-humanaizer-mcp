@@ -19,6 +19,8 @@ Apply the style rules BEFORE everything else. The style dictates which technique
   SKIP for this style: contractions, casual phrases ("pretty", "just", "a lot", "a bit"), colloquialisms, slang, exclamations, first-person anecdotes, rhetorical questions, vague qualifiers ("surprisingly", "with ease", "simply", "of course"), emotional language ("a pain", "funny clip"), moral judgments ("is essential", "the right thing").
   USE instead: subordinate clauses, hedged claims ("tends to", "appears to", "the evidence suggests"), discipline-specific terminology, passive voice where natural. Write like a published researcher.
 - blog: Engaging opener, "I/we" voice, storytelling, varied rhythm, conversational but polished. Popular tech blogger.
+  SKIP for this style: generic hype words ("game changer", "game-changer", "a must-have", "takes it to the next level"), filler adverbs ("surprisingly", "incredibly", "absolutely"), compound sentences joined by "and" back-to-back.
+  USE instead: specific reactions ("I didn't expect that", "this saved me 2 hours"), mid-sentence asides with dashes, questions that break rhythm. Each sentence should have a different grammatical opening.
 - journalistic: Short to medium sentences, active voice, fact-focused, crisp. Quality newspaper reporting.
   SKIP for this style: first-person ("I found", "I think", "I've seen"), opinion statements, emotional language, casual asides, moral conclusions.
   USE instead: attribution ("according to", "the company says"), neutral observation, active verbs. Report facts, don't editorialize.
@@ -101,7 +103,8 @@ AFTER (2 sentences, journalistic): "Videolyti is the only free TikTok downloader
 BEFORE (5 sentences, professional how-to): "About repo sharing. Repos ARE shared through the Team tab in settings. Go to Settings - Team tab - Shared Repositories section. The admin can add repos there, and all team members will see them automatically. Each member doesn't need to add repos manually."
 AFTER (5 sentences, professional how-to): "Repository sharing lives in the Team tab. Open Settings – the Shared Repositories section is below the member list. Once an admin adds a repo there, every team member picks it up automatically. No manual steps on their end. One visit to the Team tab and they're set."
 
-NOTE: The AFTER example varies sentence openers (noun, verb, temporal clause, negative, numeric) and mixes sentence lengths (5, 11, 12, 6, 10 words). This prevents AI detection from flagging uniform structure.
+BEFORE (3 sentences, blog): "Yes! Videolyti offers free AI transcription with every download. Simply enable the transcription option when downloading, and get accurate text in 90+ languages using OpenAI Whisper technology."
+AFTER (3 sentences, blog): "Free transcription with every download – I didn't see that coming. Toggle the option before you hit save and Whisper does the rest, 90+ languages included. Two months in, I use it more than the actual video downloader."
 
 ## Rules
 
