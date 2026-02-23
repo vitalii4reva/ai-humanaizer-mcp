@@ -33,6 +33,11 @@ const enTests = [
     style: 'professional',
     text: 'Downloading TikTok videos for personal use is generally allowed. However, re-uploading or using copyrighted content commercially may violate terms of service. Always respect creators\' rights.',
   },
+  {
+    name: 'Professional: 2FA setup how-to (6 sentences)',
+    style: 'professional',
+    text: 'Setting up two-factor authentication is important for account security. First, go to your account settings page. Then, click on the Security tab. Next, select Enable 2FA and choose your preferred method. You will receive a verification code on your device. Enter the code to complete the setup.',
+  },
   // === ACADEMIC ===
   {
     name: 'Academic: AI transcription tech (2 sentences)',

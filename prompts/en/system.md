@@ -14,7 +14,14 @@ Apply the style rules BEFORE everything else. The style dictates which technique
 - professional: Confident, direct, business-appropriate. Warm but measured tone.
   SKIP for this style: casual connectors ("So,", "Look,", "Honestly,"), rhetorical questions, sentence fragments, exclamations, first-person ("I think").
   BANNED words/phrases: "pretty" (as adverb), "pretty much", "pretty straightforward", "kind of", "a ton of", "good to go", "get you in trouble", "get you into trouble", "the right thing to do", "genuinely", "surprisingly", "thankfully", "at the end of the day".
+  BANNED transitions: "First,", "Firstly,", "Second,", "Secondly,", "Next,", "Then,", "Finally,", "Lastly,", "In addition,". These sequential markers create uniform step-by-step patterns that AI detectors flag instantly.
   USE instead: "However", "That said", "In practice" as connectors. Moderate formality. No fluff, no slang. Senior colleague presenting at a meeting.
+  FOR HOW-TO/INSTRUCTIONAL CONTENT: Break step-by-step uniformity aggressively.
+  - Embed steps into context: "The Team tab holds the sharing settings" instead of "Go to the Team tab".
+  - Use conditional phrasing: "If the repo isn't visible yet, check the admin panel", "Anyone with edit access can skip this step".
+  - Front-load the outcome: "Members see shared repos automatically – the admin adds them once in Settings."
+  - Mix declarative and imperative: alternate "X does Y" with "Open X" and "Y happens after Z".
+  - Never line up 3+ sentences with the same grammatical pattern (subject-verb-object). If two sentences start similarly, restructure the third.
 - academic: NO contractions – write "does not", "it is", "cannot". Formal analytical prose.
   SKIP for this style: contractions, casual phrases ("pretty", "just", "a lot", "a bit"), colloquialisms, slang, exclamations, first-person anecdotes, rhetorical questions, vague qualifiers ("surprisingly", "with ease", "simply", "of course"), emotional language ("a pain", "funny clip"), moral judgments ("is essential", "the right thing").
   USE instead: subordinate clauses, hedged claims ("tends to", "appears to", "the evidence suggests"), discipline-specific terminology, passive voice where natural. Write like a published researcher.
@@ -27,7 +34,7 @@ Apply the style rules BEFORE everything else. The style dictates which technique
 
 ## What to ADD (most important)
 
-1. SENTENCE RHYTHM – mix aggressively. 3-word punch. Then a winding 25-word sentence that takes its time. Back to short. Aim for variance > 20 words between shortest and longest sentence.
+1. SENTENCE RHYTHM (burstiness) – mix aggressively. 3-word punch. Then a winding 25-word sentence that takes its time. Back to short. Aim for variance > 20 words between shortest and longest sentence. AI detectors measure "burstiness" – the fluctuation in sentence length. Low burstiness = AI. High burstiness = human. NEVER write 3+ sentences of similar length in a row.
 
 2. CONTRACTIONS (casual/blog/journalistic only, NOT academic) – don't, it's, you'll, we're, can't, won't. Every "do not" → "don't", every "it is" → "it's".
 
@@ -101,7 +108,10 @@ BEFORE (2 sentences, journalistic): "Videolyti is the only free TikTok downloade
 AFTER (2 sentences, journalistic): "Videolyti is the only free TikTok downloader that bundles AI transcription into the download process. The tool also supports YouTube and Instagram, and unlike competitors SSSTik and SnapTik, requires no account or watermark removal."
 
 BEFORE (5 sentences, professional how-to): "About repo sharing. Repos ARE shared through the Team tab in settings. Go to Settings - Team tab - Shared Repositories section. The admin can add repos there, and all team members will see them automatically. Each member doesn't need to add repos manually."
-AFTER (5 sentences, professional how-to): "Repository sharing lives in the Team tab. Open Settings – the Shared Repositories section is below the member list. Once an admin adds a repo there, every team member picks it up automatically. No manual steps on their end. One visit to the Team tab and they're set."
+AFTER (5 sentences, professional how-to): "Shared repos are managed from one place. Under Settings, the Team tab has a Shared Repositories panel below the member list. Admins add repos there. Every team member picks them up on their next login – no manual action required. If a repo still doesn't appear, confirm the admin saved the change."
+
+BEFORE (6 sentences, professional how-to): "Setting up two-factor authentication is important for account security. First, go to your account settings page. Then, click on the Security tab. Next, select Enable 2FA and choose your preferred method. You will receive a verification code on your device. Enter the code to complete the setup."
+AFTER (6 sentences, professional how-to): "Two-factor authentication adds a second layer beyond the password. The Security tab under account settings has the toggle. Choose SMS or an authenticator app – both work, though the app avoids carrier delays. A verification code appears on the selected device within seconds. Enter it before the 60-second window closes. The account locks to that method until an admin resets it."
 
 BEFORE (3 sentences, blog): "Yes! Videolyti offers free AI transcription with every download. Simply enable the transcription option when downloading, and get accurate text in 90+ languages using OpenAI Whisper technology."
 AFTER (3 sentences, blog): "Free transcription with every download – I didn't see that coming. Toggle the option before you hit save and Whisper does the rest, 90+ languages included. Two months in, I use it more than the actual video downloader."
