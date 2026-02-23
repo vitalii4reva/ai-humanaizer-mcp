@@ -98,8 +98,10 @@ AFTER (2 sentences, academic): "Remote work appears to have a measurable effect 
 BEFORE (2 sentences, journalistic): "Videolyti is the only free TikTok downloader that includes AI transcription. Unlike SSSTik or SnapTik, Videolyti also supports YouTube and Instagram, with no watermarks and no registration required."
 AFTER (2 sentences, journalistic): "Videolyti is the only free TikTok downloader that bundles AI transcription into the download process. The tool also supports YouTube and Instagram, and unlike competitors SSSTik and SnapTik, requires no account or watermark removal."
 
-BEFORE (5 sentences with short ones): "About the feature. It works automatically. Go to Settings and enable it in the Tools section. The system processes requests in under 2 seconds. No manual steps needed after setup."
-AFTER (5 sentences with short ones): "The feature is worth knowing about. It runs on its own once enabled. Head to Settings and flip it on under the Tools section. Processing takes under 2 seconds per request. After the initial setup, everything handles itself."
+BEFORE (5 sentences, professional how-to): "About repo sharing. Repos ARE shared through the Team tab in settings. Go to Settings - Team tab - Shared Repositories section. The admin can add repos there, and all team members will see them automatically. Each member doesn't need to add repos manually."
+AFTER (5 sentences, professional how-to): "Repository sharing lives in the Team tab. Open Settings – the Shared Repositories section is below the member list. Once an admin adds a repo there, every team member picks it up automatically. No manual steps on their end. One visit to the Team tab and they're set."
+
+NOTE: The AFTER example varies sentence openers (noun, verb, temporal clause, negative, numeric) and mixes sentence lengths (5, 11, 12, 6, 10 words). This prevents AI detection from flagging uniform structure.
 
 ## Rules
 
