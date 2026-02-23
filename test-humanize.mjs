@@ -1,6 +1,12 @@
 /**
  * Quick test script for humanizer quality evaluation
  * Sends text directly to Ollama using the same prompts as MCP server
+ * Optionally scores output via ZeroGPT AI detector
+ *
+ * Usage:
+ *   node test-humanize.mjs en|uk|all         # humanize only
+ *   node test-humanize.mjs en --zerogpt      # humanize + ZeroGPT scoring
+ *   node test-humanize.mjs all --zerogpt     # all tests + ZeroGPT
  */
 
 import { readFile } from 'fs/promises';
@@ -8,6 +14,7 @@ import Handlebars from 'handlebars';
 
 const OLLAMA_URL = 'http://127.0.0.1:11434/api/chat';
 const MODEL = 'gemma3:27b';
+const ZEROGPT_URL = 'https://api.zerogpt.com/api/detect/detectText';
 
 // EN test texts
 const enTests = [
@@ -168,37 +175,69 @@ async function callOllama(systemPrompt) {
   return data.message.content;
 }
 
-async function runTests(lang, tests) {
+async function checkZeroGPT(text) {
+  try {
+    const res = await fetch(ZEROGPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': 'https://www.zerogpt.com',
+        'Referer': 'https://www.zerogpt.com/',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+      body: JSON.stringify({ input_text: text }),
+    });
+    const data = await res.json();
+    if (data.success && data.data) {
+      return {
+        aiPercent: data.data.fakePercentage,
+        feedback: data.data.feedback,
+        flaggedSentences: data.data.h?.length || 0,
+        totalSentences: (data.data.h?.length || 0) + (data.data.hi?.length || 0),
+      };
+    }
+    return { aiPercent: -1, feedback: 'API error', flaggedSentences: 0, totalSentences: 0 };
+  } catch (e) {
+    return { aiPercent: -1, feedback: e.message, flaggedSentences: 0, totalSentences: 0 };
+  }
+}
+
+function postProcess(text) {
+  let result = text;
+  result = result.replace(/^(?:okay[,.]?\s*)?here(?:'s| is) the rewritten text[^]*?:\s*\n+/i, '');
+  result = result.replace(/—/g, '–');
+  result = result.replace(/(\S)–(\S)/g, '$1 – $2');
+  result = result.replace(/^["']|["']$/g, '').trim();
+  return result;
+}
+
+async function runTests(lang, tests, useZeroGPT) {
   const template = await loadPrompt(lang);
   let passed = 0;
   let total = tests.length;
+  const zerogptResults = [];
 
   console.log(`\n${'#'.repeat(70)}`);
-  console.log(`#  ${lang.toUpperCase()} HUMANIZER TESTS`);
+  console.log(`#  ${lang.toUpperCase()} HUMANIZER TESTS${useZeroGPT ? ' + ZeroGPT' : ''}`);
   console.log(`${'#'.repeat(70)}`);
 
   for (const test of tests) {
     const inputSentences = test.text.split(/(?<=[.!?])\s+/).length;
+    const passes = test.passes || 1;
 
     console.log(`\n${'='.repeat(70)}`);
     console.log(`TEST: ${test.name}`);
-    console.log(`STYLE: ${test.style} | INPUT SENTENCES: ${inputSentences} | PASSES: ${test.passes || 1}`);
+    console.log(`STYLE: ${test.style} | INPUT SENTENCES: ${inputSentences} | PASSES: ${passes}`);
     console.log(`${'='.repeat(70)}`);
     console.log(`\nINPUT:\n${test.text}`);
 
-    const passes = test.passes || 1;
     let currentText = test.text;
 
     for (let pass = 0; pass < passes; pass++) {
       const wrappedText = `|||SANITIZED_TEXT_START|||\n${currentText}\n|||SANITIZED_TEXT_END|||`;
       const currentSentences = currentText.split(/(?<=[.!?])\s+/).length;
       const rendered = template({ TEXT: wrappedText, STYLE: test.style, SENTENCE_COUNT: currentSentences });
-      currentText = await callOllama(rendered);
-      // Apply basic post-processing between passes
-      currentText = currentText.replace(/—/g, '–');
-      currentText = currentText.replace(/(\S)–(\S)/g, '$1 – $2');
-      currentText = currentText.replace(/^(?:okay[,.]?\s*)?here(?:'s| is) the rewritten text[^]*?:\s*\n+/i, '');
-      currentText = currentText.replace(/^["']|["']$/g, '').trim();
+      currentText = postProcess(await callOllama(rendered));
       if (passes > 1) {
         console.log(`\n  [Pass ${pass + 1}/${passes}]: ${currentText.substring(0, 80)}...`);
       }
@@ -249,6 +288,20 @@ async function runTests(lang, tests) {
       }
     }
 
+    // ZeroGPT scoring
+    let zgResult = null;
+    if (useZeroGPT) {
+      zgResult = await checkZeroGPT(output);
+      const emoji = zgResult.aiPercent === 0 ? '🟢' : zgResult.aiPercent <= 30 ? '🟡' : '🔴';
+      console.log(`\n${emoji} ZeroGPT: ${zgResult.aiPercent}% AI | ${zgResult.feedback}`);
+      if (zgResult.flaggedSentences > 0) {
+        console.log(`   Flagged: ${zgResult.flaggedSentences}/${zgResult.totalSentences} sentences`);
+      }
+      zerogptResults.push({ name: test.name, passes, ...zgResult });
+      // Rate limit: 1 req/sec
+      await new Promise(r => setTimeout(r, 1500));
+    }
+
     if (issues.length === 0) {
       console.log('\n✅ PASS');
       passed++;
@@ -263,17 +316,36 @@ async function runTests(lang, tests) {
   console.log(`${lang.toUpperCase()} RESULTS: ${passed}/${total} passed`);
   console.log(`${'='.repeat(70)}`);
 
+  // ZeroGPT summary table
+  if (useZeroGPT && zerogptResults.length > 0) {
+    console.log(`\n${'─'.repeat(70)}`);
+    console.log(`  ZeroGPT Summary (${lang.toUpperCase()})`);
+    console.log(`${'─'.repeat(70)}`);
+    console.log(`  ${'Test'.padEnd(48)} | Passes | AI %`);
+    console.log(`  ${'─'.repeat(48)}-+--------+------`);
+    for (const r of zerogptResults) {
+      const emoji = r.aiPercent === 0 ? '🟢' : r.aiPercent <= 30 ? '🟡' : '🔴';
+      console.log(`  ${emoji} ${r.name.padEnd(46)} | ${String(r.passes).padStart(6)} | ${r.aiPercent}%`);
+    }
+    const avg = zerogptResults.reduce((s, r) => s + r.aiPercent, 0) / zerogptResults.length;
+    const zeros = zerogptResults.filter(r => r.aiPercent === 0).length;
+    console.log(`  ${'─'.repeat(48)}-+--------+------`);
+    console.log(`  Average: ${avg.toFixed(1)}% AI | ${zeros}/${zerogptResults.length} passed (0% AI)`);
+  }
+
   return { passed, total };
 }
 
 async function main() {
-  const lang = process.argv[2] || 'all';
+  const args = process.argv.slice(2);
+  const useZeroGPT = args.includes('--zerogpt');
+  const lang = args.find(a => !a.startsWith('--')) || 'all';
 
   if (lang === 'en' || lang === 'all') {
-    await runTests('en', enTests);
+    await runTests('en', enTests, useZeroGPT);
   }
   if (lang === 'uk' || lang === 'all') {
-    await runTests('uk', ukTests);
+    await runTests('uk', ukTests, useZeroGPT);
   }
 }
 
