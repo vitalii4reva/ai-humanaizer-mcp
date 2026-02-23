@@ -202,11 +202,48 @@ async function checkZeroGPT(text) {
   }
 }
 
+// AI vocabulary replacements — must match TextProcessor.AI_REPLACEMENTS
+const AI_REPLACEMENTS = [
+  [/\butilizing\b/gi, (m) => m[0] === 'U' ? 'Using' : 'using'],
+  [/\butilize\b/gi, (m) => m[0] === 'U' ? 'Use' : 'use'],
+  [/\bleveraging\b/gi, (m) => m[0] === 'L' ? 'Using' : 'using'],
+  [/\bleverage\b/gi, (m) => m[0] === 'L' ? 'Use' : 'use'],
+  [/\bfacilitat(?:e|es|ing)\b/gi, (m) => {
+    const cap = m[0] === 'F';
+    return /ing$/i.test(m) ? (cap ? 'Helping' : 'helping') : (cap ? 'Help' : 'help');
+  }],
+  [/\bstreamlin(?:e|es|ing)\b/gi, (m) => {
+    const cap = m[0] === 'S';
+    return /ing$/i.test(m) ? (cap ? 'Simplifying' : 'simplifying') : (cap ? 'Simplify' : 'simplify');
+  }],
+  [/\bstands out as\b/gi, 'is'],
+  [/\bserves as\b/gi, 'is'],
+  [/\bfunctions as\b/gi, 'is'],
+  [/\bacts as\b/gi, 'is'],
+  [/\bstraightforward\b/gi, (m) => m[0] === 'S' ? 'Simple' : 'simple'],
+  [/\bcomprehensive\b/gi, (m) => m[0] === 'C' ? 'Full' : 'full'],
+  [/\bseamless(?:ly)?\b/gi, (m) => {
+    const cap = m[0] === 'S';
+    return /ly$/i.test(m) ? (cap ? 'Smoothly' : 'smoothly') : (cap ? 'Smooth' : 'smooth');
+  }],
+  [/\brobust\b/gi, (m) => m[0] === 'R' ? 'Strong' : 'strong'],
+  [/\bcrucial\b/gi, (m) => m[0] === 'C' ? 'Important' : 'important'],
+  [/\bparamount\b/gi, (m) => m[0] === 'P' ? 'Important' : 'important'],
+  [/\bessential\b/gi, (m) => m[0] === 'E' ? 'Important' : 'important'],
+  [/\bvital\b/gi, (m) => m[0] === 'V' ? 'Important' : 'important'],
+  [/\bdelve\b/gi, (m) => m[0] === 'D' ? 'Look into' : 'look into'],
+];
+
 function postProcess(text) {
   let result = text;
   result = result.replace(/^(?:okay[,.]?\s*)?here(?:'s| is) the rewritten text[^]*?:\s*\n+/i, '');
   result = result.replace(/—/g, '–');
   result = result.replace(/(\S)–(\S)/g, '$1 – $2');
+  for (const [pattern, replacement] of AI_REPLACEMENTS) {
+    result = result.replace(pattern, replacement);
+  }
+  // Strip trailing superficial -ing clauses
+  result = result.replace(/,\s*(?:simplifying|enhancing|streamlining|highlighting|showcasing|underscoring|facilitating|ensuring|enabling|empowering)\s+[^.!?]*([.!?])/gi, '$1');
   result = result.replace(/^["']|["']$/g, '').trim();
   return result;
 }

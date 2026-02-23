@@ -199,6 +199,11 @@ export class TextProcessor {
       return cap ? 'Smooth' : 'smooth';
     }],
     [/\brobust\b/gi, (m) => m[0] === 'R' ? 'Strong' : 'strong'],
+    [/\bcrucial\b/gi, (m) => m[0] === 'C' ? 'Important' : 'important'],
+    [/\bparamount\b/gi, (m) => m[0] === 'P' ? 'Important' : 'important'],
+    [/\bessential\b/gi, (m) => m[0] === 'E' ? 'Important' : 'important'],
+    [/\bvital\b/gi, (m) => m[0] === 'V' ? 'Important' : 'important'],
+    [/\bdelve\b/gi, (m) => m[0] === 'D' ? 'Look into' : 'look into'],
   ];
 
   private postProcess(text: string): string {
@@ -213,6 +218,8 @@ export class TextProcessor {
     for (const [pattern, replacement] of TextProcessor.AI_REPLACEMENTS) {
       result = result.replace(pattern, replacement as any);
     }
+    // Strip trailing superficial -ing clauses (AI tell: "...simplifying the process.", "...enhancing security.")
+    result = result.replace(/,\s*(?:simplifying|enhancing|streamlining|highlighting|showcasing|underscoring|facilitating|ensuring|enabling|empowering)\s+[^.!?]*([.!?])/gi, '$1');
     // Strip leading/trailing quotes the model sometimes wraps output in
     result = result.replace(/^["']|["']$/g, '').trim();
     return result;

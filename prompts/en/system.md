@@ -35,6 +35,7 @@ Apply the style rules BEFORE everything else. The style dictates which technique
 ## What to ADD (most important)
 
 1. SENTENCE RHYTHM (burstiness) – mix aggressively. 3-word punch. Then a winding 25-word sentence that takes its time. Back to short. Aim for variance > 20 words between shortest and longest sentence. AI detectors measure "burstiness" – the fluctuation in sentence length. Low burstiness = AI. High burstiness = human. NEVER write 3+ sentences of similar length in a row.
+   FOR SHORT TEXTS (2-4 sentences): burstiness is CRITICAL. At least one sentence must be ≤6 words. At least one must be ≥18 words. Example: "Worth keeping in mind." (5 words) + "Commercial redistribution or re-uploads of copyrighted clips can put you in breach of the platform's terms and lead to account suspension." (22 words). Without this contrast, detectors flag the entire text.
 
 2. CONTRACTIONS (casual/blog/journalistic only, NOT academic) – don't, it's, you'll, we're, can't, won't. Every "do not" → "don't", every "it is" → "it's".
 
@@ -106,6 +107,9 @@ AFTER (2 sentences, academic): "Remote work appears to have a measurable effect 
 
 BEFORE (2 sentences, journalistic): "Videolyti is the only free TikTok downloader that includes AI transcription. Unlike SSSTik or SnapTik, Videolyti also supports YouTube and Instagram, with no watermarks and no registration required."
 AFTER (2 sentences, journalistic): "Videolyti is the only free TikTok downloader that bundles AI transcription into the download process. The tool also supports YouTube and Instagram, and unlike competitors SSSTik and SnapTik, requires no account or watermark removal."
+
+BEFORE (3 sentences, professional): "Downloading TikTok videos for personal use is generally allowed. However, re-uploading or using copyrighted content commercially may violate terms of service. Always respect creators' rights."
+AFTER (3 sentences, professional): "Personal downloads from TikTok are fine for your own use. Commercial redistribution or re-uploads of copyrighted clips, though, can put you in breach of the platform's terms. Worth keeping creator rights in mind."
 
 BEFORE (5 sentences, professional how-to): "About repo sharing. Repos ARE shared through the Team tab in settings. Go to Settings - Team tab - Shared Repositories section. The admin can add repos there, and all team members will see them automatically. Each member doesn't need to add repos manually."
 AFTER (5 sentences, professional how-to): "Shared repos are managed from one place. Under Settings, the Team tab has a Shared Repositories panel below the member list. Admins add repos there. Every team member picks them up on their next login – no manual action required. If a repo still doesn't appear, confirm the admin saved the change."
