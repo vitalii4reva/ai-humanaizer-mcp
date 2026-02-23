@@ -38,6 +38,12 @@ const enTests = [
     style: 'professional',
     text: 'Setting up two-factor authentication is important for account security. First, go to your account settings page. Then, click on the Security tab. Next, select Enable 2FA and choose your preferred method. You will receive a verification code on your device. Enter the code to complete the setup.',
   },
+  {
+    name: 'Professional: 2FA setup how-to TWO-PASS (6 sentences)',
+    style: 'professional',
+    passes: 2,
+    text: 'Setting up two-factor authentication is important for account security. First, go to your account settings page. Then, click on the Security tab. Next, select Enable 2FA and choose your preferred method. You will receive a verification code on your device. Enter the code to complete the setup.',
+  },
   // === ACADEMIC ===
   {
     name: 'Academic: AI transcription tech (2 sentences)',
@@ -176,14 +182,29 @@ async function runTests(lang, tests) {
 
     console.log(`\n${'='.repeat(70)}`);
     console.log(`TEST: ${test.name}`);
-    console.log(`STYLE: ${test.style} | INPUT SENTENCES: ${inputSentences}`);
+    console.log(`STYLE: ${test.style} | INPUT SENTENCES: ${inputSentences} | PASSES: ${test.passes || 1}`);
     console.log(`${'='.repeat(70)}`);
     console.log(`\nINPUT:\n${test.text}`);
 
-    const wrappedText = `|||SANITIZED_TEXT_START|||\n${test.text}\n|||SANITIZED_TEXT_END|||`;
-    const rendered = template({ TEXT: wrappedText, STYLE: test.style, SENTENCE_COUNT: inputSentences });
+    const passes = test.passes || 1;
+    let currentText = test.text;
 
-    const output = await callOllama(rendered);
+    for (let pass = 0; pass < passes; pass++) {
+      const wrappedText = `|||SANITIZED_TEXT_START|||\n${currentText}\n|||SANITIZED_TEXT_END|||`;
+      const currentSentences = currentText.split(/(?<=[.!?])\s+/).length;
+      const rendered = template({ TEXT: wrappedText, STYLE: test.style, SENTENCE_COUNT: currentSentences });
+      currentText = await callOllama(rendered);
+      // Apply basic post-processing between passes
+      currentText = currentText.replace(/—/g, '–');
+      currentText = currentText.replace(/(\S)–(\S)/g, '$1 – $2');
+      currentText = currentText.replace(/^(?:okay[,.]?\s*)?here(?:'s| is) the rewritten text[^]*?:\s*\n+/i, '');
+      currentText = currentText.replace(/^["']|["']$/g, '').trim();
+      if (passes > 1) {
+        console.log(`\n  [Pass ${pass + 1}/${passes}]: ${currentText.substring(0, 80)}...`);
+      }
+    }
+
+    const output = currentText;
     const outputSentences = output.split(/(?<=[.!?])\s+/).length;
 
     console.log(`\nOUTPUT (${outputSentences} sentences):\n${output}`);

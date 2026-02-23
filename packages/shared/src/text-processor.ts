@@ -25,7 +25,15 @@ export class TextProcessor {
     return text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
   }
 
-  async humanize(text: string, style: WritingStyle): Promise<string> {
+  async humanize(text: string, style: WritingStyle, passes: number = 1): Promise<string> {
+    let current = text;
+    for (let pass = 0; pass < passes; pass++) {
+      current = await this.singlePassHumanize(current, style);
+    }
+    return current;
+  }
+
+  private async singlePassHumanize(text: string, style: WritingStyle): Promise<string> {
     const wrappedText = wrapWithDelimiters(text);
     const sentenceCount = this.countSentences(text);
     const fullPrompt = this.prompts.render('system', {

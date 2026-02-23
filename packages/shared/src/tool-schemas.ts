@@ -8,6 +8,7 @@ import { z } from 'zod';
 export const HumanizeInputSchema = z.object({
   text: z.string().min(1),
   style: z.enum(['casual', 'professional', 'academic', 'blog', 'journalistic']).optional(),
+  passes: z.number().min(1).max(3).optional(),
 });
 
 export const DetectInputSchema = z.object({
@@ -17,6 +18,7 @@ export const DetectInputSchema = z.object({
 export const CompareInputSchema = z.object({
   text: z.string().min(1),
   style: z.enum(['casual', 'professional', 'academic', 'blog', 'journalistic']).optional(),
+  passes: z.number().min(1).max(3).optional(),
 });
 
 export const ScoreInputSchema = z.object({

@@ -55,6 +55,10 @@ const humanizeTextTool: Tool = {
         enum: ['casual', 'professional', 'academic', 'blog', 'journalistic'],
         description: 'Writing style (optional, will auto-detect if not provided)',
       },
+      passes: {
+        type: 'number',
+        description: 'Number of humanization passes (1-3, default: 1). Use 2 for how-to/instructional content to break structural patterns.',
+      },
     },
     required: ['text'],
   },
@@ -89,6 +93,10 @@ const compareVersionsTool: Tool = {
         type: 'string',
         enum: ['casual', 'professional', 'academic', 'blog', 'journalistic'],
         description: 'Writing style (optional, will auto-detect if not provided)',
+      },
+      passes: {
+        type: 'number',
+        description: 'Number of humanization passes (1-3, default: 1).',
       },
     },
     required: ['text'],
@@ -180,7 +188,7 @@ async function main() {
         case 'humanize_text': {
           const input = HumanizeInputSchema.parse(args);
           const finalStyle = resolveStyle(input.text, input.style);
-          const humanized = await processor.humanize(input.text, finalStyle);
+          const humanized = await processor.humanize(input.text, finalStyle, input.passes ?? 1);
 
           return {
             content: [
@@ -230,7 +238,7 @@ async function main() {
         case 'compare_versions': {
           const input = CompareInputSchema.parse(args);
           const finalStyle = resolveStyle(input.text, input.style);
-          const humanized = await processor.humanize(input.text, finalStyle);
+          const humanized = await processor.humanize(input.text, finalStyle, input.passes ?? 1);
           const comparison = diffGen.generate(input.text, humanized);
 
           // Format human-readable output
