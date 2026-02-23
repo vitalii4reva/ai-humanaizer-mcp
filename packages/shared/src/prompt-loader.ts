@@ -14,12 +14,19 @@ export class PromptLoader {
 
   constructor(private promptDir: string) {}
 
+  // Only load prompt templates, not reference docs
+  private static readonly TEMPLATE_FILES = new Set(['system.md', 'detect.md', 'score.md']);
+
   async initialize(): Promise<void> {
-    // Initial load: read all .md files from promptDir
+    // Initial load: read known template files from promptDir
     const files = await readdir(this.promptDir);
     for (const file of files) {
-      if (file.endsWith('.md')) {
-        await this.loadPrompt(file);
+      if (file.endsWith('.md') && PromptLoader.TEMPLATE_FILES.has(file)) {
+        try {
+          await this.loadPrompt(file);
+        } catch (error: any) {
+          console.error(`[prompt-loader] Failed to load ${file}: ${error.message}`);
+        }
       }
     }
 

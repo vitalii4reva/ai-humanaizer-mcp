@@ -62,5 +62,6 @@ export interface CompareResponse {
 export interface PromptVariables {
   TEXT: string;
   STYLE: WritingStyle;
+  SENTENCE_COUNT?: number;
   PATTERNS?: string;
 }

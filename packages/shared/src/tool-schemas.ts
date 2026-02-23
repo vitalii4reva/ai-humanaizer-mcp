@@ -1,5 +1,5 @@
 /**
- * Zod schemas for UK humanizer tool inputs and outputs
+ * Zod schemas for humanizer tool inputs and outputs
  */
 
 import { z } from 'zod';

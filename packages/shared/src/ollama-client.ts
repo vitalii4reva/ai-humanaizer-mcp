@@ -75,7 +75,7 @@ export class OllamaClient {
       if (
         error.status === 404 ||
         error.message?.includes('model not found') ||
-        error.message?.includes('model') && error.message?.includes('not found')
+        (error.message?.includes('model') && error.message?.includes('not found'))
       ) {
         throw new Error(
           `Model "${model}" not found. Pull it with: ollama pull ${model}`

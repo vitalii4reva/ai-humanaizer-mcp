@@ -3,8 +3,8 @@
  * Uses sentence-level diffing for semantic comparison
  */
 
-import { diffSentences, type Change } from 'diff';
-import type { CompareResponse } from '@ai-humanizer/shared';
+import { diffSentences } from 'diff';
+import type { CompareResponse } from './types.js';
 
 export class DiffGenerator {
   /**

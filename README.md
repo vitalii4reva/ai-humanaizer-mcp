@@ -2,7 +2,7 @@
 
 Two local MCP servers that rewrite AI-generated text to sound naturally human.
 
-- **en-humanizer**: English text humanization using qwen3:30b model
+- **en-humanizer**: English text humanization using gemma3:27b model
 - **uk-humanizer**: Ukrainian text humanization using gemma3:27b model
 
 All processing happens locally via Ollama. No cloud APIs, no data sent externally. Complete privacy.
@@ -11,9 +11,8 @@ All processing happens locally via Ollama. No cloud APIs, no data sent externall
 
 - **Node.js** v18 or higher
 - **Ollama** running locally ([download here](https://ollama.ai))
-- **Required models**:
+- **Required model**:
   ```bash
-  ollama pull qwen3:30b
   ollama pull gemma3:27b
   ```
 
@@ -139,7 +138,7 @@ Compare versions of: [paste text to humanize and compare]
 ```
 packages/
   shared/          # Common utilities (Ollama client, prompt loader, types)
-  en-humanizer/    # English MCP server (qwen3:30b)
+  en-humanizer/    # English MCP server (gemma3:27b)
   uk-humanizer/    # Ukrainian MCP server (gemma3:27b)
 prompts/
   en/              # English prompt templates

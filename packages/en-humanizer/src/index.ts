@@ -2,7 +2,7 @@
 
 /**
  * EN Humanizer MCP Server
- * Uses qwen3:30b model for English text humanization
+ * Uses gemma3:27b model for English text humanization
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -12,16 +12,18 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
-import { OllamaClient, PromptLoader, resolveStyle } from '@ai-humanizer/shared';
-import { TextProcessor } from './services/text-processor.js';
-import { DiffGenerator } from './services/diff-generator.js';
 import {
+  OllamaClient,
+  PromptLoader,
+  resolveStyle,
+  TextProcessor,
+  DiffGenerator,
   HumanizeInputSchema,
   DetectInputSchema,
   CompareInputSchema,
   ScoreInputSchema,
   HumanizeUntilHumanInputSchema,
-} from './schemas/tool-schemas.js';
+} from '@ai-humanizer/shared';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -292,7 +294,7 @@ async function main() {
           const input = HumanizeUntilHumanInputSchema.parse(args);
           const finalStyle = resolveStyle(input.text, input.style);
           const minScore = input.min_score ?? 90;
-          const maxIterations = input.max_iterations ?? 3;
+          const maxIterations = input.max_iterations ?? 5;
 
           let currentText = input.text;
           const history: { iteration: number; score: number }[] = [];
@@ -414,6 +416,14 @@ async function main() {
       };
     }
   });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    await prompts.close();
+    process.exit(0);
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 
   // Connect to stdio transport
   const transport = new StdioServerTransport();

@@ -12,16 +12,18 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
-import { OllamaClient, PromptLoader, resolveStyle } from '@ai-humanizer/shared';
-import { TextProcessor } from './services/text-processor.js';
-import { DiffGenerator } from './services/diff-generator.js';
 import {
+  OllamaClient,
+  PromptLoader,
+  resolveStyle,
+  TextProcessor,
+  DiffGenerator,
   HumanizeInputSchema,
   DetectInputSchema,
   CompareInputSchema,
   ScoreInputSchema,
   HumanizeUntilHumanInputSchema,
-} from './schemas/tool-schemas.js';
+} from '@ai-humanizer/shared';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -110,7 +112,7 @@ const scoreHumannessTool: Tool = {
 
 const humanizeUntilHumanTool: Tool = {
   name: 'humanize_until_human',
-  description: 'Iteratively rewrite AI Ukrainian text until humanness score reaches target threshold (default 90%). Returns final text, score, and iteration history.',
+  description: 'Iteratively rewrite AI Ukrainian text until humanness score reaches target threshold (default 75%). Returns final text, score, and iteration history.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -125,7 +127,7 @@ const humanizeUntilHumanTool: Tool = {
       },
       min_score: {
         type: 'number',
-        description: 'Minimum humanness score to achieve (0-100, default: 90)',
+        description: 'Minimum humanness score to achieve (0-100, default: 75)',
       },
       max_iterations: {
         type: 'number',
@@ -411,6 +413,14 @@ async function main() {
       };
     }
   });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    await prompts.close();
+    process.exit(0);
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 
   // Connect to stdio transport
   const transport = new StdioServerTransport();
