@@ -13,6 +13,7 @@ Analyze the text for these 24+ AI pattern categories:
 - Vague attributions: "Research shows", "Studies suggest", "Experts say" without specifics
 - AI vocabulary: "leverage", "utilize", "facilitate", "comprehensive", "robust", "seamless"
 - Copula avoidance: Overuse of "represents", "serves as", "functions as" instead of "is"
+- Em dash overuse: AI uses em dashes (—) excessively instead of en dashes (–) or commas
 
 **Structural markers:**
 - Rule of three: Constant use of three-item lists
