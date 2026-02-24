@@ -3,23 +3,32 @@
  */
 
 import { Ollama } from 'ollama';
-import type { OllamaChatMessage, OllamaModelConfig } from './types.js';
+import type { ChatMessage, ChatOptions, LLMClient } from './types.js';
 
-export class OllamaClient {
+export interface OllamaClientOptions {
+  host?: string;
+  timeoutMs?: number;
+  headers?: Record<string, string>;
+}
+
+export class OllamaClient implements LLMClient {
   private ollama: Ollama;
   private defaultTimeoutMs: number;
   private host: string;
 
-  constructor(host = 'http://127.0.0.1:11434', defaultTimeoutMs = 180000) {
-    this.host = host;
-    this.ollama = new Ollama({ host });
-    this.defaultTimeoutMs = defaultTimeoutMs;
+  constructor(options: OllamaClientOptions = {}) {
+    this.host = options.host ?? 'http://127.0.0.1:11434';
+    this.defaultTimeoutMs = options.timeoutMs ?? 180000;
+    this.ollama = new Ollama({
+      host: this.host,
+      ...(options.headers ? { headers: options.headers } : {}),
+    });
   }
 
   async chat(
     model: string,
-    messages: OllamaChatMessage[],
-    options?: Partial<OllamaModelConfig>
+    messages: ChatMessage[],
+    options?: Partial<ChatOptions>
   ): Promise<string> {
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
     const controller = new AbortController();

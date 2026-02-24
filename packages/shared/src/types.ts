@@ -4,19 +4,24 @@
 
 export type WritingStyle = 'casual' | 'professional' | 'academic' | 'blog' | 'journalistic';
 
-export interface OllamaChatMessage {
+export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
+export type OllamaChatMessage = ChatMessage;
 
-export interface OllamaModelConfig {
-  model: string;
-  temperature: number;
-  top_p: number;
-  repeat_penalty: number;
-  timeoutMs: number;
+export interface ChatOptions {
+  temperature?: number;
+  top_p?: number;
+  repeat_penalty?: number;
+  timeoutMs?: number;
   format?: Record<string, unknown>;
   think?: boolean;
+}
+export type OllamaModelConfig = ChatOptions & { model: string };
+
+export interface LLMClient {
+  chat(model: string, messages: ChatMessage[], options?: Partial<ChatOptions>): Promise<string>;
 }
 
 export interface HumanizeRequest {

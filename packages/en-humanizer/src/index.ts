@@ -13,7 +13,7 @@ import {
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import {
-  OllamaClient,
+  createLLMClient,
   PromptLoader,
   resolveStyle,
   TextProcessor,
@@ -148,10 +148,9 @@ const humanizeUntilHumanTool: Tool = {
 
 // Start the server
 async function main() {
-  // Initialize services
-  const ollama = new OllamaClient('http://127.0.0.1:11434', 180000);
+  const { client, model, backend } = createLLMClient();
+  console.error(`EN Humanizer: ${backend} backend, model: ${model}`);
 
-  // Resolve prompt directory (repo root + prompts/en)
   const promptDir = join(
     dirname(fileURLToPath(import.meta.url)),
     '..',
@@ -164,7 +163,7 @@ async function main() {
   const prompts = new PromptLoader(promptDir);
   await prompts.initialize();
 
-  const processor = new TextProcessor(ollama, prompts);
+  const processor = new TextProcessor(client, prompts, model);
   const diffGen = new DiffGenerator();
 
   // Register tool handlers

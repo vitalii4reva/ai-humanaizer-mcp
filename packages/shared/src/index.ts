@@ -4,6 +4,9 @@
 
 export * from './types.js';
 export { OllamaClient } from './ollama-client.js';
+export { GeminiClient } from './gemini-client.js';
+export { OpenAICompatibleClient } from './openai-compatible-client.js';
+export { createLLMClient } from './llm-factory.js';
 export { PromptLoader } from './prompt-loader.js';
 export { StyleDetector, resolveStyle } from './style-detector.js';
 export { sanitizeInput, wrapWithDelimiters } from './input-sanitizer.js';

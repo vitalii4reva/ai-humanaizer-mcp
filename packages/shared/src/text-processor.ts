@@ -3,17 +3,16 @@
  * Handles humanize, detectPatterns, and scoreHumanness
  */
 
-import { OllamaClient } from './ollama-client.js';
 import { PromptLoader } from './prompt-loader.js';
 import { wrapWithDelimiters } from './input-sanitizer.js';
-import type { WritingStyle, DetectPatternsResponse, ScoreResponse } from './types.js';
+import type { WritingStyle, DetectPatternsResponse, ScoreResponse, LLMClient } from './types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { jsonrepair } from 'jsonrepair';
 import { DetectionOutputSchema, ScoreOutputSchema } from './tool-schemas.js';
 
 export class TextProcessor {
   constructor(
-    private ollama: OllamaClient,
+    private ollama: LLMClient,
     private prompts: PromptLoader,
     private readonly model: string = 'gemma3:27b'
   ) {}
