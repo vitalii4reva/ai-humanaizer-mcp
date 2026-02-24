@@ -4,7 +4,7 @@ Two local MCP servers that rewrite AI-generated text to sound naturally human. W
 
 **en-humanizer** -- English | **uk-humanizer** -- Ukrainian
 
-All processing runs locally via [Ollama](https://ollama.ai) + gemma3:27b. No cloud APIs. No data leaves your machine.
+All processing runs via gemma3:27b. Supports three backends: **Ollama** (local), **OpenRouter**, and **Google AI Studio**.
 
 ---
 
@@ -25,6 +25,7 @@ All processing runs locally via [Ollama](https://ollama.ai) + gemma3:27b. No clo
 - [AI Detection Results](#ai-detection-results)
 - [Project Structure](#project-structure)
 - [Development](#development)
+- [LLM Backend](#llm-backend)
 - [Testing](#testing)
 
 ---
@@ -32,11 +33,10 @@ All processing runs locally via [Ollama](https://ollama.ai) + gemma3:27b. No clo
 ## Prerequisites
 
 - **Node.js** v18+
-- **Ollama** running locally -- [download](https://ollama.ai)
-- Pull the model:
-  ```bash
-  ollama pull gemma3:27b
-  ```
+- **One of** the following LLM backends:
+  - **Ollama** (local) -- [download](https://ollama.ai), then `ollama pull gemma3:27b`
+  - **OpenRouter** -- [get API key](https://openrouter.ai/keys)
+  - **Google AI Studio** -- [get API key](https://aistudio.google.com/apikey)
 
 ## Installation
 
@@ -275,19 +275,44 @@ ZeroGPT detection comparison on the same 6-sentence how-to text:
 
 ## AI Detection Results
 
-Tested with [ZeroGPT](https://zerogpt.com) API across 3 runs (12 EN tests + 7 UK tests):
+Tested with [ZeroGPT](https://zerogpt.com) API (12 EN tests + 7 UK tests):
 
 | Category | ZeroGPT Score |
 |----------|--------------|
 | EN Casual | 0% (stable) |
 | EN Blog | 0% (stable) |
 | EN Journalistic | 0% (stable) |
-| EN Professional | 0-40% (varies by content) |
-| EN Professional 2-pass | 0-30% (lower) |
+| EN Professional | 0-24% (short FAQ 0%, long how-to ~24%) |
+| EN Professional 2-pass | 0% (stable) |
 | EN Academic | 0% (stable) |
 | **UK all styles** | **0% (stable)** |
 
 Short texts (2-3 sentences) pass consistently. Longer instructional/how-to texts benefit from 2-pass.
+
+---
+
+## LLM Backend
+
+Create `.env.local` in the project root:
+
+```bash
+# Option 1: OpenRouter (recommended -- fast, no local GPU needed)
+LLM_BACKEND=openrouter
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=google/gemma-3-27b-it    # optional, this is the default
+
+# Option 2: Google AI Studio (free tier, ~15 RPM)
+LLM_BACKEND=google
+GOOGLE_AI_API_KEY=AI...
+GOOGLE_AI_MODEL=gemma-3-27b-it            # optional
+
+# Option 3: Ollama (local, needs GPU)
+LLM_BACKEND=ollama
+OLLAMA_HOST=http://127.0.0.1:11434        # optional
+OLLAMA_MODEL=gemma3:27b                   # optional
+```
+
+Without `LLM_BACKEND`, the system auto-detects by checking which API key is set (OpenRouter > Google > Ollama fallback).
 
 ---
 
@@ -296,7 +321,7 @@ Short texts (2-3 sentences) pass consistently. Longer instructional/how-to texts
 ```
 ai-humanaizer/
   packages/
-    shared/            # OllamaClient, TextProcessor, PromptLoader, types
+    shared/            # LLMClient, LLMFactory, TextProcessor, PromptLoader, types
     en-humanizer/      # English MCP server
     uk-humanizer/      # Ukrainian MCP server
   prompts/
@@ -304,6 +329,7 @@ ai-humanaizer/
     uk/                # Ukrainian prompt templates
   configs/             # Example editor configurations
   test-humanize.mjs    # Test script with ZeroGPT integration
+  .env.local           # LLM backend config (not committed)
 ```
 
 ## Development
@@ -327,7 +353,7 @@ node test-humanize.mjs en --zerogpt # EN + ZeroGPT AI detection scoring
 node test-humanize.mjs all --zerogpt # All + ZeroGPT
 ```
 
-The test script sends text to Ollama, applies post-processing, checks for AI cliches/patterns, and optionally scores each output via ZeroGPT API.
+The test script sends text to the configured LLM backend, applies post-processing, checks for AI cliches/patterns, and optionally scores each output via ZeroGPT API.
 
 ---
 
@@ -337,18 +363,17 @@ The test script sends text to Ollama, applies post-processing, checks for AI cli
 
 **en-humanizer** -- англійська | **uk-humanizer** -- українська
 
-Все працює локально через [Ollama](https://ollama.ai) + gemma3:27b. Жодних хмарних API. Дані не покидають вашу машину.
+Все працює через gemma3:27b. Три бекенди: **Ollama** (локально), **OpenRouter**, **Google AI Studio**.
 
 ---
 
 ## Вимоги
 
 - **Node.js** v18+
-- **Ollama** локально -- [завантажити](https://ollama.ai)
-- Завантажити модель:
-  ```bash
-  ollama pull gemma3:27b
-  ```
+- **Один з** LLM-бекендів:
+  - **Ollama** (локально) -- [завантажити](https://ollama.ai), потім `ollama pull gemma3:27b`
+  - **OpenRouter** -- [отримати API ключ](https://openrouter.ai/keys)
+  - **Google AI Studio** -- [отримати API ключ](https://aistudio.google.com/apikey)
 
 ## Встановлення
 
@@ -568,9 +593,35 @@ npm run build
 | EN Casual | 0% (стабільно) |
 | EN Blog | 0% (стабільно) |
 | EN Journalistic | 0% (стабільно) |
-| EN Professional | 0-40% (залежить від контенту) |
-| EN Professional 2-pass | 0-30% (нижче) |
+| EN Professional | 0-24% (FAQ 0%, how-to ~24%) |
+| EN Professional 2-pass | 0% (стабільно) |
+| EN Academic | 0% (стабільно) |
 | **UK всі стилі** | **0% (стабільно)** |
+
+---
+
+## LLM-бекенд
+
+Створіть `.env.local` в корені проекту:
+
+```bash
+# Варіант 1: OpenRouter (рекомендовано -- швидко, без GPU)
+LLM_BACKEND=openrouter
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=google/gemma-3-27b-it    # опціонально
+
+# Варіант 2: Google AI Studio (безкоштовний рівень, ~15 RPM)
+LLM_BACKEND=google
+GOOGLE_AI_API_KEY=AI...
+GOOGLE_AI_MODEL=gemma-3-27b-it            # опціонально
+
+# Варіант 3: Ollama (локально, потрібен GPU)
+LLM_BACKEND=ollama
+OLLAMA_HOST=http://127.0.0.1:11434        # опціонально
+OLLAMA_MODEL=gemma3:27b                   # опціонально
+```
+
+Без `LLM_BACKEND` система автовизначає бекенд за наявним API ключем (OpenRouter > Google > Ollama).
 
 ---
 
