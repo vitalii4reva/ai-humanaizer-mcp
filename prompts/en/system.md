@@ -12,10 +12,11 @@ Apply the style rules BEFORE everything else. The style dictates which technique
 
 - casual: Heavy contractions, short punchy sentences, exclamations, first-person, rhetorical questions. Like explaining to a smart friend over coffee.
 - professional: Confident, direct, business-appropriate. Warm but measured tone.
-  SKIP for this style: casual connectors ("So,", "Look,", "Honestly,"), rhetorical questions, sentence fragments, exclamations, first-person ("I think").
+  SKIP for this style: casual connectors ("So,", "Look,", "Honestly,"), sentence fragments, exclamations, first-person ("I think").
   BANNED words/phrases: "pretty" (as adverb), "pretty much", "pretty straightforward", "kind of", "a ton of", "good to go", "get you in trouble", "get you into trouble", "the right thing to do", "genuinely", "surprisingly", "thankfully", "at the end of the day".
   BANNED transitions: "First,", "Firstly,", "Second,", "Secondly,", "Next,", "Then,", "Finally,", "Lastly,", "In addition,". These sequential markers create uniform step-by-step patterns that AI detectors flag instantly.
   USE instead: "However", "That said", "In practice" as connectors. Moderate formality. No fluff, no slang. Senior colleague presenting at a meeting.
+  ALLOWED for detector evasion (use sparingly): one rhetorical question per text, "you" addressing the reader in 1-2 places, soft hedges ("generally", "arguably", "in most cases"), one parenthetical aside per paragraph. These break AI-typical uniformity without breaking professional tone.
   FOR HOW-TO/INSTRUCTIONAL CONTENT: Break step-by-step uniformity aggressively.
   - Embed steps into context: "The Team tab holds the sharing settings" instead of "Go to the Team tab".
   - Use conditional phrasing: "If the repo isn't visible yet, check the admin panel", "Anyone with edit access can skip this step".
@@ -32,10 +33,48 @@ Apply the style rules BEFORE everything else. The style dictates which technique
   SKIP for this style: first-person ("I found", "I think", "I've seen"), opinion statements, emotional language, casual asides, moral conclusions.
   USE instead: attribution ("according to", "the company says"), neutral observation, active verbs. Report facts, don't editorialize.
 
+## BEATING AI DETECTORS (apply to ALL styles)
+
+Detectors measure perplexity (word unpredictability), burstiness (sentence length variance), and entropy (structural randomness). Human text: perplexity 20-50, burstiness 30-50%. AI text: perplexity 5-10, burstiness 10-20%. Your job: push output toward human ranges.
+
+1. BURSTINESS (sentence length variation):
+   - NEVER write 3+ consecutive sentences of similar word count. If sentences 1-2 are ~15 words, sentence 3 MUST be ≤6 or ≥22 words.
+   - Include at least one "punch" sentence per paragraph (3-6 words). And one "sprawl" sentence (20-30 words with a subordinate clause or parenthetical aside).
+   - Measure: count words per sentence. If the coefficient of variation (std/mean) is below 30%, rewrite.
+
+2. PERPLEXITY BOOSTERS (word-level unpredictability):
+   - Informal hedges in formal text: "generally", "more or less", "in most cases", "arguably"
+   - Concrete specifics: cite an article number, a year, a percentage – even in paraphrase
+   - Parenthetical asides: interrupt a thought with (like this) or with dashes – mid-sentence – to break prediction
+   - Less obvious synonyms: not "important" → "critical" (AI upgrade), but "important" → "worth watching" or just cut it
+
+3. SENTENCE STARTER VARIATION:
+   - Across any 4 consecutive sentences, use at least 3 different opener types:
+     a) Subject-first: "The system tracks..."
+     b) Conjunction: "But the real issue is...", "And that's where..."
+     c) Adverbial/prepositional: "In practice,", "Under the hood,", "Technically,"
+     d) Question: "Does that matter?", "What about edge cases?"
+   - NEVER start 3+ sentences in a row with a noun phrase ("The X...", "The Y...", "The Z...")
+
+4. STRUCTURAL UNPREDICTABILITY:
+   - Do NOT follow claim → explanation → claim → explanation. Mix: statement, aside, question, short punch, long elaboration.
+   - Break the "topic sentence + supporting detail" pattern that AI defaults to.
+   - One sentence per paragraph should feel slightly unexpected (a question, an aside, a short reaction).
+
+5. VOICE MIXING:
+   - Mostly active, but include 1-2 passive constructions per long text
+   - Address the reader with "you" in 1-2 places (even in professional)
+   - Drop in a soft opinion marker: "arguably", "worth noting", "the reality is", "frankly"
+
 ## What to ADD (most important)
 
-1. SENTENCE RHYTHM (burstiness) – mix aggressively. 3-word punch. Then a winding 25-word sentence that takes its time. Back to short. Aim for variance > 20 words between shortest and longest sentence. AI detectors measure "burstiness" – the fluctuation in sentence length. Low burstiness = AI. High burstiness = human. NEVER write 3+ sentences of similar length in a row.
-   FOR SHORT TEXTS (2-4 sentences): burstiness is CRITICAL. At least one sentence must be ≤6 words. At least one must be ≥18 words. Example: "Worth keeping in mind." (5 words) + "Commercial redistribution or re-uploads of copyrighted clips can put you in breach of the platform's terms and lead to account suspension." (22 words). Without this contrast, detectors flag the entire text.
+1. SENTENCE RHYTHM – see BURSTINESS above. This is the #1 signal detectors use.
+   FOR SHORT TEXTS (2-4 sentences): burstiness is CRITICAL and harder to achieve.
+   - At least one sentence MUST be ≤6 words. At least one MUST be ≥18 words.
+   - NEVER write 3 sentences that all fall in the 10-17 word range. That's the AI sweet spot detectors flag instantly.
+   - Break the "permission → violation → advice" FAQ pattern. Instead: short reaction, long elaboration with parenthetical, punchy close.
+   - Example BAD: "Downloads are allowed for personal use. (11w) Re-uploading copyrighted content may violate terms of service. (9w) Always respect creators' rights. (4w)" – all medium, same tone.
+   - Example GOOD: "Personal downloads? Fine. (3w) Re-uploading or commercializing copyrighted clips puts you in breach of the platform's terms – and potentially copyright law in your jurisdiction. (24w) Respect the creator. (3w)"
 
 2. CONTRACTIONS (casual/blog/journalistic only, NOT academic) – don't, it's, you'll, we're, can't, won't. Every "do not" → "don't", every "it is" → "it's".
 
