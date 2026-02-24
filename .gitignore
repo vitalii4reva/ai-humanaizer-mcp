@@ -5,3 +5,5 @@ dist/
 *.tsbuildinfo
 info.md
 BATCH-HUMANIZE.md
+.env.local
+test-results-*.txt
