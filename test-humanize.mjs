@@ -10,11 +10,43 @@
  */
 
 import { readFile } from 'fs/promises';
+import { config } from 'dotenv';
 import Handlebars from 'handlebars';
 
-const OLLAMA_URL = 'http://127.0.0.1:11434/api/chat';
-const MODEL = 'gemma3:27b';
+// Load .env.local from project root
+config({ path: '.env.local' });
+
 const ZEROGPT_URL = 'https://api.zerogpt.com/api/detect/detectText';
+
+// Resolve backend: LLM_BACKEND explicit, or auto-detect (matches llm-factory.ts)
+function makeOpenRouter() {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
+  return { name: 'openrouter', model: process.env.OPENROUTER_MODEL ?? 'google/gemma-3-27b-it', apiKey, baseUrl: 'https://openrouter.ai/api/v1' };
+}
+function makeGoogle() {
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not set');
+  return { name: 'gemini', model: process.env.GOOGLE_AI_MODEL ?? 'gemma-3-27b-it', apiKey };
+}
+function makeOllama() {
+  return { name: 'ollama', model: process.env.OLLAMA_MODEL ?? 'gemma3:27b', host: process.env.OLLAMA_HOST ?? 'http://127.0.0.1:11434' };
+}
+
+function resolveBackend() {
+  const explicit = process.env.LLM_BACKEND?.trim().toLowerCase();
+  if (explicit) {
+    switch (explicit) {
+      case 'openrouter': return makeOpenRouter();
+      case 'google': return makeGoogle();
+      case 'ollama': return makeOllama();
+      default: throw new Error(`Unknown LLM_BACKEND="${explicit}". Use: openrouter, google, ollama`);
+    }
+  }
+  if (process.env.OPENROUTER_API_KEY) return makeOpenRouter();
+  if (process.env.GOOGLE_AI_API_KEY) return makeGoogle();
+  return makeOllama();
+}
 
 // EN test texts
 const enTests = [
@@ -135,10 +167,8 @@ async function loadPrompt(lang) {
   return Handlebars.compile(raw);
 }
 
-async function callOllama(systemPrompt) {
+function splitMessages(systemPrompt) {
   const messages = [];
-
-  // Split at delimiters for system/user separation
   const delimStart = '|||USER_INPUT_START|||';
   const delimEnd = '|||USER_INPUT_END|||';
   const startIdx = systemPrompt.indexOf(delimStart);
@@ -154,23 +184,69 @@ async function callOllama(systemPrompt) {
   } else {
     messages.push({ role: 'system', content: systemPrompt });
   }
+  return messages;
+}
 
-  const res = await fetch(OLLAMA_URL, {
+async function callLLM(backend, systemPrompt) {
+  const messages = splitMessages(systemPrompt);
+
+  if (backend.name === 'openrouter') {
+    const res = await fetch(`${backend.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${backend.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: backend.model,
+        messages,
+        temperature: 0.85,
+        top_p: 0.9,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${JSON.stringify(data)}`);
+    return data.choices?.[0]?.message?.content ?? '';
+  }
+
+  if (backend.name === 'gemini') {
+    // Merge system into first user message (Gemma on AI Studio)
+    const systemText = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+    const nonSystem = messages.filter(m => m.role !== 'system');
+    const contents = nonSystem.length > 0
+      ? nonSystem.map((m, i) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: i === 0 && systemText ? `${systemText}\n\n${m.content}` : m.content }],
+        }))
+      : [{ role: 'user', parts: [{ text: systemText }] }];
+
+    const modelId = backend.model.startsWith('models/') ? backend.model : `models/${backend.model}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/${modelId}:generateContent?key=${backend.apiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: { temperature: 0.85, topP: 0.9 },
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(`Gemini ${res.status}: ${JSON.stringify(data)}`);
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  }
+
+  // Ollama (default)
+  const res = await fetch(`${backend.host}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
+      model: backend.model,
       messages,
       stream: false,
-      options: {
-        temperature: 0.85,
-        top_p: 0.9,
-        repeat_penalty: 1.15,
-      },
+      options: { temperature: 0.85, top_p: 0.9, repeat_penalty: 1.15 },
       think: false,
     }),
   });
-
   const data = await res.json();
   return data.message.content;
 }
@@ -248,14 +324,14 @@ function postProcess(text) {
   return result;
 }
 
-async function runTests(lang, tests, useZeroGPT) {
+async function runTests(lang, tests, useZeroGPT, backend) {
   const template = await loadPrompt(lang);
   let passed = 0;
   let total = tests.length;
   const zerogptResults = [];
 
   console.log(`\n${'#'.repeat(70)}`);
-  console.log(`#  ${lang.toUpperCase()} HUMANIZER TESTS${useZeroGPT ? ' + ZeroGPT' : ''}`);
+  console.log(`#  ${lang.toUpperCase()} HUMANIZER TESTS${useZeroGPT ? ' + ZeroGPT' : ''}  [${backend.name}: ${backend.model}]`);
   console.log(`${'#'.repeat(70)}`);
 
   for (const test of tests) {
@@ -274,7 +350,7 @@ async function runTests(lang, tests, useZeroGPT) {
       const wrappedText = `|||SANITIZED_TEXT_START|||\n${currentText}\n|||SANITIZED_TEXT_END|||`;
       const currentSentences = currentText.split(/(?<=[.!?])\s+/).length;
       const rendered = template({ TEXT: wrappedText, STYLE: test.style, SENTENCE_COUNT: currentSentences });
-      currentText = postProcess(await callOllama(rendered));
+      currentText = postProcess(await callLLM(backend, rendered));
       if (passes > 1) {
         console.log(`\n  [Pass ${pass + 1}/${passes}]: ${currentText.substring(0, 80)}...`);
       }
@@ -377,12 +453,15 @@ async function main() {
   const args = process.argv.slice(2);
   const useZeroGPT = args.includes('--zerogpt');
   const lang = args.find(a => !a.startsWith('--')) || 'all';
+  const backend = resolveBackend();
+
+  console.log(`Backend: ${backend.name} | Model: ${backend.model}`);
 
   if (lang === 'en' || lang === 'all') {
-    await runTests('en', enTests, useZeroGPT);
+    await runTests('en', enTests, useZeroGPT, backend);
   }
   if (lang === 'uk' || lang === 'all') {
-    await runTests('uk', ukTests, useZeroGPT);
+    await runTests('uk', ukTests, useZeroGPT, backend);
   }
 }
 
