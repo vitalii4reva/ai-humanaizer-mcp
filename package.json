@@ -10,7 +10,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build && npm run copy:prompts",
+    "copy:prompts": "rm -rf packages/en-humanizer/dist/prompts packages/uk-humanizer/dist/prompts && cp -r prompts/en packages/en-humanizer/dist/prompts && cp -r prompts/uk packages/uk-humanizer/dist/prompts",
     "build:shared": "tsc --build packages/shared",
     "build:en": "tsc --build packages/en-humanizer",
     "build:uk": "tsc --build packages/uk-humanizer"

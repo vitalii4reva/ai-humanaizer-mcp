@@ -6,6 +6,7 @@
  */
 
 import { config } from 'dotenv';
+import { existsSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import type { LLMClient } from './types.js';
@@ -13,9 +14,12 @@ import { OllamaClient } from './ollama-client.js';
 import { GeminiClient } from './gemini-client.js';
 import { OpenAICompatibleClient } from './openai-compatible-client.js';
 
-// Load .env.local from project root (3 levels up from packages/shared/dist/)
+// Try repo root (dev), then cwd (user project), then rely on process.env (MCP config)
 const __dirname = dirname(fileURLToPath(import.meta.url));
-config({ path: resolve(__dirname, '..', '..', '..', '.env.local') });
+const repoEnv = resolve(__dirname, '..', '..', '..', '.env.local');
+const cwdEnv = resolve(process.cwd(), '.env.local');
+if (existsSync(repoEnv)) config({ path: repoEnv, quiet: true });
+else if (existsSync(cwdEnv)) config({ path: cwdEnv, quiet: true });
 
 export type Backend = 'openrouter' | 'google' | 'ollama';
 

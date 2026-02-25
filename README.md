@@ -11,21 +11,22 @@ All processing runs via gemma3:27b. Supports three backends: **Ollama** (local),
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Tools](#tools)
-- [Writing Styles](#writing-styles)
+- [Quick Start (npx)](#quick-start-npx)
 - [Editor Setup](#editor-setup)
   - [Claude Code](#claude-code)
   - [Claude Desktop](#claude-desktop)
   - [Cursor](#cursor)
   - [Zed](#zed)
   - [Windsurf](#windsurf)
+- [Tools](#tools)
+- [Writing Styles](#writing-styles)
 - [Usage Examples](#usage-examples)
 - [Multi-pass Humanization](#multi-pass-humanization)
 - [AI Detection Results](#ai-detection-results)
+- [LLM Backend](#llm-backend)
+- [Installation (from source)](#installation-from-source)
 - [Project Structure](#project-structure)
 - [Development](#development)
-- [LLM Backend](#llm-backend)
 - [Testing](#testing)
 
 ---
@@ -38,13 +39,203 @@ All processing runs via gemma3:27b. Supports three backends: **Ollama** (local),
   - **OpenRouter** -- [get API key](https://openrouter.ai/keys)
   - **Google AI Studio** -- [get API key](https://aistudio.google.com/apikey)
 
-## Installation
+## Quick Start (npx)
+
+No cloning, no building -- just paste config into your editor and go.
+
+1. Get an API key from [OpenRouter](https://openrouter.ai/keys), [Google AI Studio](https://aistudio.google.com/apikey), or run [Ollama](https://ollama.ai) locally
+2. Add the MCP server config to your editor (see [Editor Setup](#editor-setup) below)
+3. Ask your AI assistant: *"Humanize this text: ..."*
+
+---
+
+## Editor Setup
+
+### Claude Code
+
+Run this command to add the server directly:
 
 ```bash
-git clone https://github.com/anthropics/ai-humanaizer.git
-cd ai-humanaizer
-npm install
-npm run build
+claude mcp add en-humanizer -- npx -y @ai-humanizer/en-humanizer
+```
+
+Then set the required env vars in `~/.claude/settings.json` or `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    }
+  }
+}
+```
+
+For Ukrainian, add a second server:
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    },
+    "uk-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    }
+  }
+}
+```
+
+Restart Claude Code (`/mcp` to verify servers are connected). The 5 tools appear automatically.
+
+### Claude Desktop
+
+Open settings: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+
+Add:
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    },
+    "uk-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. The tools appear in the conversation toolbar (hammer icon).
+
+### Cursor
+
+Add to `.cursor/mcp.json` in project root (or `~/.cursor/mcp.json` globally):
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    },
+    "uk-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    }
+  }
+}
+```
+
+### Zed
+
+Merge into `~/.config/zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "en-humanizer": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@ai-humanizer/en-humanizer"],
+        "env": {
+          "LLM_BACKEND": "openrouter",
+          "OPENROUTER_API_KEY": "sk-or-v1-..."
+        }
+      }
+    },
+    "uk-humanizer": {
+      "command": {
+        "path": "npx",
+        "args": ["-y", "@ai-humanizer/uk-humanizer"],
+        "env": {
+          "LLM_BACKEND": "openrouter",
+          "OPENROUTER_API_KEY": "sk-or-v1-..."
+        }
+      }
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    },
+    "uk-humanizer": {
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
+    }
+  }
+}
+```
+
+### Using a different LLM backend
+
+Replace the `env` block in any config above. See [LLM Backend](#llm-backend) for all options.
+
+**Google AI Studio** (free tier):
+```json
+"env": {
+  "LLM_BACKEND": "google",
+  "GOOGLE_AI_API_KEY": "AI..."
+}
+```
+
+**Ollama** (local, needs GPU):
+```json
+"env": {
+  "LLM_BACKEND": "ollama"
+}
 ```
 
 ---
@@ -72,128 +263,6 @@ Both servers expose 5 identical tools (with language-specific prompts):
 | `journalistic` | Fact-focused, active voice, crisp | News, product descriptions |
 
 If `style` is omitted, it auto-detects from the input text.
-
----
-
-## Editor Setup
-
-### Claude Code
-
-Add to `.claude/settings.json` in project root (or `~/.claude/settings.json` globally):
-
-```json
-{
-  "mcpServers": {
-    "en-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
-    },
-    "uk-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
-    }
-  }
-}
-```
-
-Or with relative paths if the config is inside the project:
-
-```json
-{
-  "mcpServers": {
-    "en-humanizer": {
-      "command": "node",
-      "args": ["packages/en-humanizer/dist/index.js"]
-    },
-    "uk-humanizer": {
-      "command": "node",
-      "args": ["packages/uk-humanizer/dist/index.js"]
-    }
-  }
-}
-```
-
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-
-```json
-{
-  "mcpServers": {
-    "en-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
-    },
-    "uk-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
-    }
-  }
-}
-```
-
-Restart Claude Desktop after saving. The tools appear automatically in the conversation.
-
-### Cursor
-
-Add to `.cursor/mcp.json` in project root (or `~/.cursor/mcp.json` globally):
-
-```json
-{
-  "mcpServers": {
-    "en-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
-    },
-    "uk-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
-    }
-  }
-}
-```
-
-### Zed
-
-Merge into `~/.config/zed/settings.json`:
-
-```json
-{
-  "context_servers": {
-    "en-humanizer": {
-      "command": {
-        "path": "node",
-        "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
-      }
-    },
-    "uk-humanizer": {
-      "command": {
-        "path": "node",
-        "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
-      }
-    }
-  }
-}
-```
-
-### Windsurf
-
-Add to `~/.codeium/windsurf/mcp_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "en-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
-    },
-    "uk-humanizer": {
-      "command": "node",
-      "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
-    }
-  }
-}
-```
 
 ---
 
@@ -293,28 +362,48 @@ Short texts (2-3 sentences) pass consistently. Longer instructional/how-to texts
 
 ## LLM Backend
 
-Create `.env.local` in the project root:
+Three backends available. Pass the env vars via the `env` block in your MCP config (see [Editor Setup](#editor-setup)), or via `.env.local` when running from source.
 
-```bash
-# Option 1: OpenRouter (recommended -- fast, no local GPU needed)
-LLM_BACKEND=openrouter
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=google/gemma-3-27b-it    # optional, this is the default
-
-# Option 2: Google AI Studio (free tier, ~15 RPM)
-LLM_BACKEND=google
-GOOGLE_AI_API_KEY=AI...
-GOOGLE_AI_MODEL=gemma-3-27b-it            # optional
-
-# Option 3: Ollama (local, needs GPU)
-LLM_BACKEND=ollama
-OLLAMA_HOST=http://127.0.0.1:11434        # optional
-OLLAMA_MODEL=gemma3:27b                   # optional
-```
+| Backend | Env vars | Notes |
+|---------|----------|-------|
+| **OpenRouter** (recommended) | `LLM_BACKEND=openrouter` `OPENROUTER_API_KEY=sk-or-...` | Fast, no local GPU. Optional: `OPENROUTER_MODEL` (default: `google/gemma-3-27b-it`) |
+| **Google AI Studio** | `LLM_BACKEND=google` `GOOGLE_AI_API_KEY=AI...` | Free tier, ~15 RPM. Optional: `GOOGLE_AI_MODEL` |
+| **Ollama** | `LLM_BACKEND=ollama` | Local, needs GPU. `ollama pull gemma3:27b` first. Optional: `OLLAMA_HOST`, `OLLAMA_MODEL` |
 
 Without `LLM_BACKEND`, the system auto-detects by checking which API key is set (OpenRouter > Google > Ollama fallback).
 
 ---
+
+## Installation (from source)
+
+```bash
+git clone https://github.com/anthropics/ai-humanaizer.git
+cd ai-humanaizer
+npm install
+npm run build
+```
+
+When running from source, create `.env.local` in the project root with your backend config (see table above), or pass env vars in your MCP config.
+
+<details>
+<summary>Editor config with local paths (from source)</summary>
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+    },
+    "uk-humanizer": {
+      "command": "node",
+      "args": ["/absolute/path/to/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+    }
+  }
+}
+```
+
+</details>
 
 ## Project Structure
 
@@ -375,14 +464,13 @@ The test script sends text to the configured LLM backend, applies post-processin
   - **OpenRouter** -- [отримати API ключ](https://openrouter.ai/keys)
   - **Google AI Studio** -- [отримати API ключ](https://aistudio.google.com/apikey)
 
-## Встановлення
+## Швидкий старт (npx)
 
-```bash
-git clone https://github.com/anthropics/ai-humanaizer.git
-cd ai-humanaizer
-npm install
-npm run build
-```
+Без клонування, без збірки -- просто вставте конфіг у редактор.
+
+1. Отримайте API-ключ: [OpenRouter](https://openrouter.ai/keys), [Google AI Studio](https://aistudio.google.com/apikey), або запустіть [Ollama](https://ollama.ai) локально
+2. Додайте MCP-конфіг у свій редактор (див. [Налаштування редакторів](#налаштування-редакторів))
+3. Попросіть AI-асистента: *"Гуманізуй цей текст: ..."*
 
 ---
 
@@ -416,43 +504,69 @@ npm run build
 
 ### Claude Code
 
-Додати до `.claude/settings.json` у корені проекту (або `~/.claude/settings.json` глобально):
+Додайте сервер командою:
+
+```bash
+claude mcp add en-humanizer -- npx -y @ai-humanizer/en-humanizer
+```
+
+Або вручну в `~/.claude/settings.json` (глобально) чи `.claude/settings.json` (проект):
 
 ```json
 {
   "mcpServers": {
     "en-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     },
     "uk-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     }
   }
 }
 ```
+
+Перезапустіть Claude Code (`/mcp` щоб перевірити підключення). 5 інструментів з'являться автоматично.
 
 ### Claude Desktop
 
-Додати до `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) або `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+Відкрийте: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) або `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+
+Додайте:
 
 ```json
 {
   "mcpServers": {
     "en-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     },
     "uk-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     }
   }
 }
 ```
 
-Перезапустіть Claude Desktop після збереження. Інструменти з'являться автоматично.
+Перезапустіть Claude Desktop. Інструменти з'являться на панелі (іконка молотка).
 
 ### Cursor
 
@@ -462,12 +576,20 @@ npm run build
 {
   "mcpServers": {
     "en-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     },
     "uk-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     }
   }
 }
@@ -482,14 +604,22 @@ npm run build
   "context_servers": {
     "en-humanizer": {
       "command": {
-        "path": "node",
-        "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+        "path": "npx",
+        "args": ["-y", "@ai-humanizer/en-humanizer"],
+        "env": {
+          "LLM_BACKEND": "openrouter",
+          "OPENROUTER_API_KEY": "sk-or-v1-..."
+        }
       }
     },
     "uk-humanizer": {
       "command": {
-        "path": "node",
-        "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+        "path": "npx",
+        "args": ["-y", "@ai-humanizer/uk-humanizer"],
+        "env": {
+          "LLM_BACKEND": "openrouter",
+          "OPENROUTER_API_KEY": "sk-or-v1-..."
+        }
       }
     }
   }
@@ -504,14 +634,41 @@ npm run build
 {
   "mcpServers": {
     "en-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/en-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     },
     "uk-humanizer": {
-      "command": "node",
-      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@ai-humanizer/uk-humanizer"],
+      "env": {
+        "LLM_BACKEND": "openrouter",
+        "OPENROUTER_API_KEY": "sk-or-v1-..."
+      }
     }
   }
+}
+```
+
+### Інший LLM-бекенд
+
+Замініть блок `env` в будь-якому конфігу вище. Див. [LLM-бекенд](#llm-бекенд) для всіх варіантів.
+
+**Google AI Studio** (безкоштовний):
+```json
+"env": {
+  "LLM_BACKEND": "google",
+  "GOOGLE_AI_API_KEY": "AI..."
+}
+```
+
+**Ollama** (локально, потрібен GPU):
+```json
+"env": {
+  "LLM_BACKEND": "ollama"
 }
 ```
 
@@ -602,28 +759,48 @@ npm run build
 
 ## LLM-бекенд
 
-Створіть `.env.local` в корені проекту:
+Три бекенди. Передайте змінні через блок `env` у MCP-конфігу (див. [Налаштування редакторів](#налаштування-редакторів)), або через `.env.local` при роботі з вихідним кодом.
 
-```bash
-# Варіант 1: OpenRouter (рекомендовано -- швидко, без GPU)
-LLM_BACKEND=openrouter
-OPENROUTER_API_KEY=sk-or-...
-OPENROUTER_MODEL=google/gemma-3-27b-it    # опціонально
-
-# Варіант 2: Google AI Studio (безкоштовний рівень, ~15 RPM)
-LLM_BACKEND=google
-GOOGLE_AI_API_KEY=AI...
-GOOGLE_AI_MODEL=gemma-3-27b-it            # опціонально
-
-# Варіант 3: Ollama (локально, потрібен GPU)
-LLM_BACKEND=ollama
-OLLAMA_HOST=http://127.0.0.1:11434        # опціонально
-OLLAMA_MODEL=gemma3:27b                   # опціонально
-```
+| Бекенд | Змінні | Примітки |
+|--------|--------|----------|
+| **OpenRouter** (рекомендовано) | `LLM_BACKEND=openrouter` `OPENROUTER_API_KEY=sk-or-...` | Швидко, без GPU. Опціонально: `OPENROUTER_MODEL` (за замовчуванням: `google/gemma-3-27b-it`) |
+| **Google AI Studio** | `LLM_BACKEND=google` `GOOGLE_AI_API_KEY=AI...` | Безкоштовний рівень, ~15 RPM. Опціонально: `GOOGLE_AI_MODEL` |
+| **Ollama** | `LLM_BACKEND=ollama` | Локально, потрібен GPU. Спочатку `ollama pull gemma3:27b`. Опціонально: `OLLAMA_HOST`, `OLLAMA_MODEL` |
 
 Без `LLM_BACKEND` система автовизначає бекенд за наявним API ключем (OpenRouter > Google > Ollama).
 
 ---
+
+## Встановлення (з вихідного коду)
+
+```bash
+git clone https://github.com/anthropics/ai-humanaizer.git
+cd ai-humanaizer
+npm install
+npm run build
+```
+
+При роботі з вихідним кодом створіть `.env.local` в корені проекту з конфігом бекенду (див. таблицю вище), або передайте змінні через MCP-конфіг.
+
+<details>
+<summary>Конфіг редактора з локальними шляхами (з вихідного коду)</summary>
+
+```json
+{
+  "mcpServers": {
+    "en-humanizer": {
+      "command": "node",
+      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/en-humanizer/dist/index.js"]
+    },
+    "uk-humanizer": {
+      "command": "node",
+      "args": ["/абсолютний/шлях/до/ai-humanaizer/packages/uk-humanizer/dist/index.js"]
+    }
+  }
+}
+```
+
+</details>
 
 ## Розробка
 

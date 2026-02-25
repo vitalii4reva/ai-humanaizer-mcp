@@ -1,14 +1,20 @@
 {
   "name": "@ai-humanizer/en-humanizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "ai-humanizer-en": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@ai-humanizer/shared": "*",
+    "@ai-humanizer/shared": "^1.0.0",
     "@modelcontextprotocol/sdk": "^1.0.4"
   }
 }

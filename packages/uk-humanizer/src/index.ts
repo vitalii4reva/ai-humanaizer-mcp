@@ -24,6 +24,7 @@ import {
   ScoreInputSchema,
   HumanizeUntilHumanInputSchema,
 } from '@ai-humanizer/shared';
+import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -151,14 +152,11 @@ async function main() {
   const { client, model, backend } = createLLMClient();
   console.error(`UK Humanizer: ${backend} backend, model: ${model}`);
 
-  const promptDir = join(
-    dirname(fileURLToPath(import.meta.url)),
-    '..',
-    '..',
-    '..',
-    'prompts',
-    'uk'
-  );
+  // Dev: prompts at repo root. npm install: prompts bundled in dist/
+  const __dir = dirname(fileURLToPath(import.meta.url));
+  const repoPrompts = join(__dir, '..', '..', '..', 'prompts', 'uk');
+  const bundledPrompts = join(__dir, 'prompts');
+  const promptDir = existsSync(repoPrompts) ? repoPrompts : bundledPrompts;
 
   const prompts = new PromptLoader(promptDir);
   await prompts.initialize();

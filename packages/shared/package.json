@@ -1,6 +1,6 @@
 {
   "name": "@ai-humanizer/shared",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,6 +17,7 @@
     "dist"
   ],
   "dependencies": {
+    "dotenv": "^17.0.0",
     "ollama": "^0.5.0",
     "handlebars": "^4.7.0",
     "chokidar": "^4.0.0",
