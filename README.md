@@ -1,5 +1,8 @@
 # AI Humanaizer
 
+[![npm](https://img.shields.io/npm/v/@ai-humanizer/en-humanizer)](https://www.npmjs.com/package/@ai-humanizer/en-humanizer)
+[![npm](https://img.shields.io/npm/v/@ai-humanizer/uk-humanizer)](https://www.npmjs.com/package/@ai-humanizer/uk-humanizer)
+
 Two local MCP servers that rewrite AI-generated text to sound naturally human. Works with any MCP-compatible editor.
 
 **en-humanizer** -- English | **uk-humanizer** -- Ukrainian
@@ -377,7 +380,7 @@ Without `LLM_BACKEND`, the system auto-detects by checking which API key is set 
 ## Installation (from source)
 
 ```bash
-git clone https://github.com/anthropics/ai-humanaizer.git
+git clone https://github.com/vitalii4reva/ai-humanaizer-mcp.git
 cd ai-humanaizer
 npm install
 npm run build
@@ -774,7 +777,7 @@ claude mcp add en-humanizer -- npx -y @ai-humanizer/en-humanizer
 ## Встановлення (з вихідного коду)
 
 ```bash
-git clone https://github.com/anthropics/ai-humanaizer.git
+git clone https://github.com/vitalii4reva/ai-humanaizer-mcp.git
 cd ai-humanaizer
 npm install
 npm run build
