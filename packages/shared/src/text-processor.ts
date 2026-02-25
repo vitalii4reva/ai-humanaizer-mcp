@@ -24,12 +24,67 @@ export class TextProcessor {
     return text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
   }
 
+  private static readonly CHUNK_THRESHOLD = 2000;
+
   async humanize(text: string, style: WritingStyle, passes: number = 1): Promise<string> {
     let current = text;
     for (let pass = 0; pass < passes; pass++) {
-      current = await this.singlePassHumanize(current, style);
+      if (current.length > TextProcessor.CHUNK_THRESHOLD) {
+        current = await this.chunkedHumanize(current, style);
+      } else {
+        current = await this.singlePassHumanize(current, style);
+      }
     }
     return current;
+  }
+
+  /**
+   * Split long text into paragraphs and humanize each separately
+   * to prevent LLM from condensing/summarizing
+   */
+  private async chunkedHumanize(text: string, style: WritingStyle): Promise<string> {
+    // Always split on single \n — empty lines from \n\n are preserved as ''
+    const lines = text.split('\n');
+
+    const results: string[] = [];
+    let contentCount = 0;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        results.push('');
+        continue;
+      }
+      if (this.isStructuralElement(trimmed)) {
+        results.push(trimmed);
+        continue;
+      }
+      contentCount++;
+      const humanized = await this.singlePassHumanize(trimmed, style);
+      results.push(humanized);
+    }
+
+    console.error(`[TextProcessor] Chunked: ${contentCount} content paragraphs processed`);
+    return results.join('\n');
+  }
+
+  /**
+   * Detect headers, UDK codes, keywords — elements that should not be humanized
+   */
+  private isStructuralElement(text: string): boolean {
+    const trimmed = text.trim();
+    if (!trimmed) return true;
+    // UDK codes
+    if (/^УДК\s/.test(trimmed)) return true;
+    // Keywords line
+    if (/^Ключові слова:/i.test(trimmed)) return true;
+    if (/^Keywords:/i.test(trimmed)) return true;
+    // ALL CAPS text without sentence endings (section headers/titles)
+    const stripped = trimmed.replace(/\s+$/, '');
+    if (stripped === stripped.toUpperCase() && stripped !== stripped.toLowerCase() && !/[.!?]$/.test(stripped)) return true;
+    // Short line without period (likely a header)
+    if (trimmed.length < 80 && !/[.!?]/.test(trimmed)) return true;
+    return false;
   }
 
   private async singlePassHumanize(text: string, style: WritingStyle): Promise<string> {

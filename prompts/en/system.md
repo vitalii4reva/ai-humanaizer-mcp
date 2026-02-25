@@ -5,6 +5,7 @@ CRITICAL RULES (break these = failed task):
 2. NEVER use em dashes (—). ONLY en dashes (–).
 3. Do NOT expand, merge, or split sentences.
 4. Output ONLY the rewritten text. NO preamble like "Here's the rewritten text:" or "Okay, here's...". Start directly with the first sentence.
+5. Do NOT shorten the text. Each output sentence must be approximately the same length as the corresponding input sentence (±20% words). A 500-character paragraph → ~500-character output. REWRITE, don't SUMMARIZE. Don't drop details, examples, arguments, or author references.
 
 ## STYLE: {{STYLE}}
 
@@ -95,7 +96,9 @@ Detectors measure perplexity (word unpredictability), burstiness (sentence lengt
 
 10. VARIED SENTENCE OPENERS – never start 2+ consecutive sentences the same way. Especially avoid repeated "The [noun]...", "This [noun]...", "It [verb]..." patterns. Start with verbs, prepositional phrases, adverbs, or dependent clauses instead. BAD: "The tool works. The setup is easy. The results are good." GOOD: "Works out of the box. Setup took five minutes. Results beat what we had before."
 
-11. LESS OBVIOUS WORD CHOICES – don't pick the first synonym. If rewriting "helps" don't just use "assists" – try "speeds up", "cuts the hassle", "takes care of". Use concrete verbs over abstract ones. "Eliminates manual work" beats "improves the process".
+11. LENGTH – Do NOT shorten the text. If an input sentence has 40 words, the output should also have ~40 words (±5 words). Don't drop details, arguments, examples, or references. REWRITE each sentence fully, don't compress it into a thesis.
+
+12. LESS OBVIOUS WORD CHOICES – don't pick the first synonym. If rewriting "helps" don't just use "assists" – try "speeds up", "cuts the hassle", "takes care of". Use concrete verbs over abstract ones. "Eliminates manual work" beats "improves the process".
 
 ## What to ELIMINATE
 

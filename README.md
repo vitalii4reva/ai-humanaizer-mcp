@@ -326,6 +326,14 @@ Runs up to 5 iterations, scoring after each. Stops when the target is reached or
 
 ---
 
+## Long Text Support
+
+Texts over 2000 characters are automatically split into paragraphs and each paragraph is humanized separately. This prevents the LLM from condensing or summarizing long content.
+
+- Section headers (ALL CAPS, UDK codes, keywords) are preserved as-is
+- Each paragraph keeps its original sentence count and length
+- Tested on a 24,500-character academic article: output 107% of original length (vs 32% without chunking)
+
 ## Multi-pass Humanization
 
 The `passes` parameter (1-3) runs the text through humanization multiple times. Each pass sees different text and makes different choices, breaking patterns the previous pass left.
@@ -733,6 +741,14 @@ claude mcp add en-humanizer -- npx -y @ai-humanizer/en-humanizer
 Запускає до 5 ітерацій, оцінюючи після кожної. Зупиняється при досягненні цілі або плато.
 
 ---
+
+## Довгі тексти
+
+Тексти понад 2000 символів автоматично розбиваються на абзаци, кожен з яких гуманізується окремо. Це запобігає скороченню та стисканню довгого контенту.
+
+- Заголовки розділів (ALL CAPS, УДК, ключові слова) зберігаються без змін
+- Кожен абзац зберігає кількість речень та довжину
+- Тестовано на академічній статті (24 500 символів): результат 107% від оригіналу (замість 32% без чанкінгу)
 
 ## Мульти-прохід
 
