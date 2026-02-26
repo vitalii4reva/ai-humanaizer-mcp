@@ -149,7 +149,7 @@ const humanizeUntilHumanTool: Tool = {
 
 // Start the server
 async function main() {
-  const { client, model, backend } = createLLMClient();
+  const { client, model, backend } = await createLLMClient();
   console.error(`EN Humanizer: ${backend} backend, model: ${model}`);
 
   // Dev: prompts at repo root. npm install: prompts bundled in dist/

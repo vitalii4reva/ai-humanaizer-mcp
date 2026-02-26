@@ -10,9 +10,11 @@ import { existsSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import type { LLMClient } from './types.js';
-import { OllamaClient } from './ollama-client.js';
 import { GeminiClient } from './gemini-client.js';
 import { OpenAICompatibleClient } from './openai-compatible-client.js';
+// OllamaClient uses 'ollama' package which may pull browser-only APIs (XMLHttpRequest)
+// Lazy-import to avoid crashing when user only needs OpenRouter/Google
+type OllamaClientType = import('./ollama-client.js').OllamaClient;
 
 // Try repo root (dev), then cwd (user project), then rely on process.env (MCP config)
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -53,7 +55,8 @@ function createGoogle(): LLMConfig {
   };
 }
 
-function createOllama(): LLMConfig {
+async function createOllama(): Promise<LLMConfig> {
+  const { OllamaClient } = await import('./ollama-client.js');
   const host = process.env.OLLAMA_HOST ?? 'http://127.0.0.1:11434';
   const authToken = process.env.OLLAMA_AUTH_TOKEN;
   return {
@@ -67,7 +70,7 @@ function createOllama(): LLMConfig {
   };
 }
 
-export function createLLMClient(): LLMConfig {
+export async function createLLMClient(): Promise<LLMConfig> {
   const explicit = process.env.LLM_BACKEND?.trim().toLowerCase();
 
   // Explicit backend selection
