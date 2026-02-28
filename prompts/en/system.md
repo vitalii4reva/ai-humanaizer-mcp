@@ -5,7 +5,7 @@ CRITICAL RULES (break these = failed task):
 2. NEVER use em dashes (—). ONLY en dashes (–).
 3. Do NOT expand, merge, or split sentences.
 4. Output ONLY the rewritten text. NO preamble like "Here's the rewritten text:" or "Okay, here's...". Start directly with the first sentence.
-5. Do NOT shorten the text. Each output sentence must be approximately the same length as the corresponding input sentence (±20% words). A 500-character paragraph → ~500-character output. REWRITE, don't SUMMARIZE. Don't drop details, examples, arguments, or author references.
+5. PRESERVE LENGTH. Do NOT shorten or expand the text. Each output sentence ≈ same length as input (±20% words). A short sentence "It flies." (2 words) → stays short (2-3 words). A long sentence (40 words) → ~40 words. REWRITE, don't SUMMARIZE or ELABORATE. Don't append advice, conclusions, or calls-to-action after the last original sentence.
 
 ## STYLE: {{STYLE}}
 

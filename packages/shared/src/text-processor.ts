@@ -125,7 +125,9 @@ export class TextProcessor {
       });
     });
 
-    return this.postProcess(response);
+    let result = this.postProcess(response);
+    result = this.enforceSentenceCount(result, sentenceCount);
+    return result;
   }
 
   /**
@@ -219,6 +221,19 @@ export class TextProcessor {
   /**
    * Post-process LLM output to fix common issues models ignore
    */
+  /**
+   * Trim output to match expected sentence count if LLM added extra sentences
+   */
+  private enforceSentenceCount(text: string, expectedCount: number): string {
+    const sentences = text.match(/[^.!?]*[.!?]+/g);
+    if (!sentences || sentences.length <= expectedCount) return text;
+
+    // LLM added extra sentences — truncate to expected count
+    const trimmed = sentences.slice(0, expectedCount).join('').trim();
+    console.error(`[TextProcessor] Trimmed ${sentences.length} → ${expectedCount} sentences`);
+    return trimmed;
+  }
+
   /**
    * AI vocabulary replacements map: [pattern, replacement]
    * Replacement can be a string or a function for case-preserving swaps.
